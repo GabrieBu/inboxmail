@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.progetto_progiii.Controller.ViewInboxController">
+    <VBox alignment="CENTER" spacing="30.0">
+        <padding>
+            <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+        </padding>
+        <SplitPane dividerPositions="0.3582175925925926" prefHeight="586.0" prefWidth="866.0" style="-fx-background-color: white; -fx-border-color: gray;" VBox.vgrow="ALWAYS">
+            <items>
+                <VBox VBox.vgrow="ALWAYS">
+                    <children>
+                        <ListView id="listViewInbox" fx:id="listViewMails" style="-fx-border-radius: 20;" VBox.vgrow="ALWAYS" />
+                    </children>
+                </VBox>
+                <VBox layoutX="10.0" layoutY="10.0" prefHeight="584.0" prefWidth="517.0" />
+            </items>
+        </SplitPane>
+    </VBox>
+
+    <AnchorPane>
+        <Button fx:id="writeButton" onAction="#showDialog" prefHeight="50.0" prefWidth="50.0" text="Write" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="20.0" />
+        <Label fx:id="labelUserMail" layoutX="40.0" layoutY="14.0" minHeight="16" minWidth="150" prefHeight="23.0" prefWidth="306.0" />
+        <DialogPane fx:id="dialogPane" minHeight="250.0" minWidth="250.0" prefHeight="500.0" prefWidth="500.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10;" visible="false" AnchorPane.bottomAnchor="26.0" AnchorPane.rightAnchor="19.0">
+            <content>
+                <VBox alignment="TOP_RIGHT" spacing="20">
+               <Button mnemonicParsing="false" style="-fx-background-color: white;" text="X" onAction="#closeDialog"/>
+               <padding>
+                  <Insets right="10.0" top="10.0" />
+               </padding>
+                </VBox>
+            </content>
+         <effect>
+            <DropShadow />
+         </effect>
+        </DialogPane>
+    </AnchorPane>
+</StackPane>
