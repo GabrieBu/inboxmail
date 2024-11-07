@@ -8,23 +8,32 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class ViewInboxController{
     private Inbox inbox;
 
-    private final ObservableList<Inbox.Mail> mailObservableList = FXCollections.observableArrayList(); //remove final later
+    @FXML
+    private TextField toTextField;
+
+    @FXML
+    private TextField subjectTextField;
+
+    @FXML
+    private TextArea bodyTextArea;
 
     @FXML
     private ListView<Inbox.Mail> listViewMails;
 
     @FXML
-    private Button writeButton;
+    private VBox composePanel;
 
     @FXML
-    private DialogPane dialogPane;
-
-    @FXML
-    private Label labelUserMail;
+    private TextField textFieldUsermail;
 
     @FXML
     public void initModel(Inbox inbox) {
@@ -33,20 +42,14 @@ public class ViewInboxController{
         }
         this.inbox = inbox;
         System.out.println("Model Inbox has been initialized [ViewInboxController]");
-        labelUserMail.textProperty().bind(inbox.userMailProperty());
-        inbox.userMailProperty().addListener(new ChangeListener<String>() {
-            public void changed(ObservableValue<? extends String> observableValue, String oldVal, String newVal) {
-                labelUserMail.setText(newVal);
-                // System.out.println("User mail Inbox: " + inbox.getUserMail());
-            }
-        });
+        textFieldUsermail.textProperty().bind(inbox.userMailProperty());
 
         inbox.loadMails();
 
-        mailObservableList.addAll(inbox.getInbox());
+        ObservableList<Inbox.Mail> mailObservableList = inbox.getMails();
         listViewMails.setItems(mailObservableList);
 
-        listViewMails.setCellFactory(param -> new ListCell<Inbox.Mail>() {
+        listViewMails.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Inbox.Mail mail, boolean empty) {
                 super.updateItem(mail, empty);
@@ -59,12 +62,18 @@ public class ViewInboxController{
         });
     }
 
-
-    public void showDialog(ActionEvent actionEvent) {
-        dialogPane.setVisible(true);
+    public void showWritePanel(ActionEvent actionEvent) {
+        composePanel.setVisible(true);
     }
 
-    public void closeDialog(ActionEvent actionEvent) {
-        dialogPane.setVisible(false);
+    public void sendEmail(ActionEvent actionEvent) {
+        List<String> recipients = Arrays.asList(toTextField.getText().split(","));;
+        Inbox.Mail new_mail = new Inbox.Mail(textFieldUsermail.textProperty().get(), recipients, subjectTextField.textProperty().get(), bodyTextArea.getText());
+        inbox.addMail(new_mail);
+        System.out.println("New mail has been sent");
+        toTextField.clear();
+        subjectTextField.clear();
+        bodyTextArea.clear();
+        composePanel.setVisible(false);
     }
 }

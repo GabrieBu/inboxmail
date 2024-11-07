@@ -2,6 +2,8 @@ package com.example.progetto_progiii.Model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -11,15 +13,19 @@ public class Inbox {
     static int currentIdMail = 0;
     static int currentSelectedMail = 0; // clicked last time on this object displayed
     private final StringProperty userMail = new SimpleStringProperty();
-    private LinkedList<Mail> inbox;
+    private final ObservableList<Mail> inbox;
+
+    public ObservableList<Mail> getMails() {
+        return inbox;
+    }
 
     public Inbox(String userMail) {
         setUserMail(userMail);
-        this.inbox = new LinkedList<Mail>();
+        this.inbox = FXCollections.observableArrayList();
     }
 
     public Inbox() {
-        this.inbox = new LinkedList<Mail>();
+        this.inbox = FXCollections.observableArrayList();
     }
 
     public StringProperty userMailProperty() {return userMail;}
@@ -28,17 +34,12 @@ public class Inbox {
 
     public void setUserMail(String userMail) {this.userMail.set(userMail);}
 
-    public List<Mail> getInbox() {
-        return inbox;
-    }
-
     public Mail getMail(int id){
         return inbox.get(id);
     }
 
-    public boolean addMail(Mail mail){
-        this.inbox.addFirst(mail); //O(1) time complexity
-        return true;
+    public void addMail(Mail mail){
+        this.inbox.add(mail); //O(1) time complexity
     }
 
     public boolean removeMail(int id){
@@ -53,6 +54,7 @@ public class Inbox {
         return false;
     }
 
+    //delete in the prossimo future
     public void loadMails(){
         List<String> to = new LinkedList<>();
         to.add("abc@gmail.com");
@@ -61,8 +63,6 @@ public class Inbox {
             inbox.add(newMail);
         }
     }
-
-
 
     public static class Mail{
         private final int idMail;

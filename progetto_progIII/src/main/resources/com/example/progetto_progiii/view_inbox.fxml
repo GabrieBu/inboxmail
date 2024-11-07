@@ -2,8 +2,8 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <StackPane style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.progetto_progiii.Controller.ViewInboxController">
     <VBox alignment="CENTER" spacing="30.0">
@@ -23,20 +23,59 @@
     </VBox>
 
     <AnchorPane>
-        <Button fx:id="writeButton" onAction="#showDialog" prefHeight="50.0" prefWidth="50.0" text="Write" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="20.0" />
-        <Label fx:id="labelUserMail" layoutX="40.0" layoutY="14.0" minHeight="16" minWidth="150" prefHeight="23.0" prefWidth="306.0" />
-        <DialogPane fx:id="dialogPane" minHeight="250.0" minWidth="250.0" prefHeight="500.0" prefWidth="500.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10;" visible="false" AnchorPane.bottomAnchor="26.0" AnchorPane.rightAnchor="19.0">
-            <content>
-                <VBox alignment="TOP_RIGHT" spacing="20">
-               <Button mnemonicParsing="false" style="-fx-background-color: white;" text="X" onAction="#closeDialog"/>
-               <padding>
-                  <Insets right="10.0" top="10.0" />
-               </padding>
+        <Button fx:id="writeButton" onAction="#showWritePanel" prefHeight="50.0" prefWidth="50.0" text="Write" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="20.0" />
+        <VBox fx:id="composePanel" alignment="CENTER" layoutX="474.0" layoutY="232.0" prefHeight="405.0" prefWidth="453.0" spacing="5.0" style="-fx-background-color: white; -fx-border-color: gray; -fx-background-radius: 5;" visible="false" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="20.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" prefHeight="74.0" prefWidth="451.0" spacing="5.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Label text="To: " HBox.hgrow="ALWAYS">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+                        <TextField fx:id="toTextField" prefHeight="26.0" prefWidth="363.0" HBox.hgrow="ALWAYS">
+                            <font>
+                                <Font size="16.0" />
+                            </font>
+                        </TextField>
+                    </children>
+                </HBox>
+                <Separator prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" prefHeight="37.0" prefWidth="452.0" spacing="5.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Label text="Subject:  " HBox.hgrow="ALWAYS">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+                        <TextField fx:id="subjectTextField" prefHeight="26.0" prefWidth="363.0" HBox.hgrow="ALWAYS">
+                            <font>
+                                <Font size="16.0" />
+                            </font>
+                        </TextField>
+                    </children>
+                </HBox>
+                <Separator layoutX="10.0" layoutY="251.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="5.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Label text="Body: ">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+                        <TextArea fx:id="bodyTextArea" prefHeight="200.0" prefWidth="200.0" />
+                    </children>
                 </VBox>
-            </content>
-         <effect>
-            <DropShadow />
-         </effect>
-        </DialogPane>
+                <Button mnemonicParsing="false" onAction="#sendEmail" prefHeight="40.0" prefWidth="115.0" text="Send" />
+            </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+        </VBox>
+      <TextField fx:id="textFieldUsermail" alignment="CENTER" editable="false" layoutX="40.0" layoutY="14.0" minHeight="16.0" minWidth="150.0" prefHeight="23.0" prefWidth="306.0">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
     </AnchorPane>
 </StackPane>
