@@ -8,6 +8,7 @@ import javafx.collections.ObservableList;
 import java.util.LinkedList;
 import java.util.List;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Inbox {
     static int currentIdMail = 0;
@@ -36,6 +37,14 @@ public class Inbox {
 
     public Mail getMail(int id){
         return inbox.get(id);
+    }
+
+    public void setCurrentSelectedMail(Mail selectedItem) {
+        currentSelectedMail = selectedItem.getId();
+    }
+
+    public Mail getCurrentSelectedMail() {
+        return inbox.get(currentSelectedMail);
     }
 
     public void addMail(Mail mail){
@@ -98,12 +107,17 @@ public class Inbox {
             return subject;
         }
 
-        public String getBody(String body) {
+        public String getBody() {
             return body;
         }
 
-        public LocalDateTime getDate(String body) {
+        public LocalDateTime getDate() {
             return date_time;
+        }
+
+        public String getDateFormatted() {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            return date_time.format(formatter);
         }
 
         public void setFrom(String from) {
