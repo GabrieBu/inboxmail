@@ -5,6 +5,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
@@ -77,11 +78,28 @@ public class ViewInboxController{
         });
 
         //non mi rende clickable gli item :(
-        listViewMails.getSelectionModel().selectedItemProperty().addListener((observableValue, mail, t1) -> {
+        /*listViewMails.getSelectionModel().selectedItemProperty().addListener((observableValue, mail, t1) -> {
             inbox.setCurrentSelectedMail(listViewMails.getSelectionModel().getSelectedItem());
             displayTo.setText(inbox.getCurrentSelectedMail().getSubject());
             displayBody.setText(inbox.getCurrentSelectedMail().getBody());
+        });*/
+
+        listViewMails.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Inbox.Mail>() {
+            @Override
+            public void changed(ObservableValue<? extends Inbox.Mail> observableValue, Inbox.Mail inbox, Inbox.Mail t1) {
+                Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
+                displayTo.setText(currentMail.getSubject());
+                displayBody.setText(currentMail.getBody());
+            }
         });
+
+        listViewMails.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                System.out.println("clicked on " + listViewMails.getSelectionModel().getSelectedItem().getSubject());
+            }
+        });
+
     }
 
     private boolean validate(String email){

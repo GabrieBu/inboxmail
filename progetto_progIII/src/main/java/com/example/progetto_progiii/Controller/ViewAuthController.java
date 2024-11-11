@@ -52,7 +52,7 @@ public class ViewAuthController {
         }
         else{
             labelError.setVisible(true);
-            labelError.setText("Invalid email address. Correct format: abc123@provider.com");
+            labelError.setText("Invalid email address.\nCorrect format: abc123@provider.com");
         }
     }
 }
