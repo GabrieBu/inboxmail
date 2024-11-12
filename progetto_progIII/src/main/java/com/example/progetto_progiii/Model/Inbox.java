@@ -68,7 +68,7 @@ public class Inbox {
         List<String> to = new LinkedList<>();
         to.add("abc@gmail.com");
         for(int i = 0; i < 10; i++){
-            Mail newMail = new Mail(this.getUserMail(), to, "Subject" + i, "Body" + i);
+            Mail newMail = new Mail("a@b.com", to, "Subject" + i, "Body" + i);
             inbox.add(newMail);
         }
     }

@@ -9,7 +9,10 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +47,9 @@ public class ViewInboxController{
     private TextField displayTo;
 
     @FXML
+    private TextField displayDate;
+
+    @FXML
     private TextArea displayBody;
 
     @FXML
@@ -69,20 +75,24 @@ public class ViewInboxController{
             @Override
             protected void updateItem(Inbox.Mail mail, boolean empty) {
                 super.updateItem(mail, empty);
+
                 if (empty || mail == null) {
                     setText(null);
+                    setGraphic(null);
                 } else {
-                    setText(mail.getSubject() + " - " + mail.getDateFormatted());
+                    Label senderLabel = new Label(mail.getFrom());
+                    Label subjectLabel = new Label(" - " + mail.getSubject());
+                    Label dateLabel = new Label(" " + mail.getDateFormatted());
+                    senderLabel.setStyle("-fx-font-weight: bold;");
+                    dateLabel.setStyle("-fx-font-weight: bold;");
+                    HBox content = new HBox(senderLabel, subjectLabel, dateLabel);
+                    content.setSpacing(5);
+                    setGraphic(content);
+                    setText(null);
                 }
             }
         });
 
-        //non mi rende clickable gli item :(
-        /*listViewMails.getSelectionModel().selectedItemProperty().addListener((observableValue, mail, t1) -> {
-            inbox.setCurrentSelectedMail(listViewMails.getSelectionModel().getSelectedItem());
-            displayTo.setText(inbox.getCurrentSelectedMail().getSubject());
-            displayBody.setText(inbox.getCurrentSelectedMail().getBody());
-        });*/
 
         listViewMails.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Inbox.Mail>() {
             @Override
@@ -90,6 +100,7 @@ public class ViewInboxController{
                 Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
                 displayTo.setText(currentMail.getSubject());
                 displayBody.setText(currentMail.getBody());
+                displayDate.setText(currentMail.getDateFormatted());
             }
         });
 
@@ -99,7 +110,6 @@ public class ViewInboxController{
                 System.out.println("clicked on " + listViewMails.getSelectionModel().getSelectedItem().getSubject());
             }
         });
-
     }
 
     private boolean validate(String email){
