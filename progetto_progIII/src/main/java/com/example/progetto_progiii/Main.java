@@ -27,6 +27,9 @@ public class Main extends Application {
 
         contrAuth.initModel(inbox, stage, sceneInbox);
         contrInbox.initModel(inbox);
+        //min width and height will be modified when scene changes
+        stage.setMinWidth(400);
+        stage.setMinHeight(300);
         stage.show();
     }
 

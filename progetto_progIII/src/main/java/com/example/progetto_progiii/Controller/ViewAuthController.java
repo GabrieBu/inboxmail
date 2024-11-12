@@ -48,6 +48,9 @@ public class ViewAuthController {
             System.out.println("User mail auth: " + inbox.getUserMail());
 
             stage.setScene(sceneInbox);
+            // changing min height and width when the scene changes
+            stage.setMinHeight(730);
+            stage.setMinWidth(950);
             stage.setTitle("Inbox - Home");
         }
         else{
