@@ -47,6 +47,9 @@ public class ViewInboxController{
     private TextField displayTo;
 
     @FXML
+    private TextField displayFrom;
+
+    @FXML
     private TextField displayDate;
 
     @FXML
@@ -101,6 +104,7 @@ public class ViewInboxController{
                 displayTo.setText(currentMail.getSubject());
                 displayBody.setText(currentMail.getBody());
                 displayDate.setText(currentMail.getDateFormatted());
+                displayFrom.setText("From: " + currentMail.getFrom());
             }
         });
 

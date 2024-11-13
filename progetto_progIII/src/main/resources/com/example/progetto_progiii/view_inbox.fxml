@@ -26,123 +26,141 @@
             <Insets bottom="10.0" top="10.0" />
          </padding>
       </VBox>
-        <SplitPane dividerPositions="0.5" prefHeight="586.0" prefWidth="866.0" style="-fx-background-color: white; -fx-border-color: gray;" VBox.vgrow="ALWAYS">
+        <SplitPane dividerPositions="0.5" style="-fx-background-color: white; -fx-border-color: gray;" VBox.vgrow="ALWAYS">
             <items>
-                <ListView id="listViewInbox" fx:id="listViewMails" editable="true">
+                <ListView id="listViewInbox" fx:id="listViewMails" editable="true" prefWidth="258.0">
                     <cursor>
                         <Cursor fx:constant="HAND" />
                     </cursor>
                 </ListView>
-
-                                                                         <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                 <Button focusTraversable="true" mouseTransparent="false" onAction="#showWritePanel" prefHeight="50.0" prefWidth="50.0" text="Write" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-                   <VBox alignment="CENTER">
-                       <children>
-                     <GridPane gridLinesVisible="true" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="450.0" VBox.vgrow="ALWAYS">
-                       <columnConstraints>
-                           <ColumnConstraints hgrow="SOMETIMES" prefWidth="157.0" maxWidth="Infinity" minWidth="151.6" />
-                           <ColumnConstraints hgrow="SOMETIMES" prefWidth="157.0" maxWidth="Infinity" minWidth="104.20001525878905" />
-                         <ColumnConstraints hgrow="SOMETIMES" prefWidth="193.0" maxWidth="Infinity" minWidth="74.5999847412109" />
-                         <ColumnConstraints hgrow="SOMETIMES" prefWidth="148.0" maxWidth="Infinity" minWidth="125.19999999999999" />
-                       </columnConstraints>
-                       <rowConstraints>
-                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                       </rowConstraints>
-                        <children>
-                           <ButtonBar prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.halignment="LEFT">
-                             <buttons>
-                               <Button mnemonicParsing="false" text="Delete" />
-                                 <Button layoutX="417.0" layoutY="12.0" mnemonicParsing="false" text="Reply" />
-                                 <Button layoutX="337.0" layoutY="91.0" mnemonicParsing="false" text="Reply All" />
-                                 <Button layoutX="337.0" layoutY="12.0" mnemonicParsing="false" text="Forward" />
-                             </buttons>
-                           </ButtonBar>
-                                 <TextField fx:id="displayTo" editable="false" focusTraversable="false" GridPane.columnSpan="4" GridPane.rowIndex="2">
-                              <font>
-                                 <Font name="System Bold" size="14.0" />
-                              </font>
-                           </TextField>
-                           <TextField fx:id="displayDate" alignment="CENTER_RIGHT" editable="false" prefHeight="30.0" prefWidth="144.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="1">
-                              <font>
-                                 <Font size="14.0" />
-                              </font>
-                           </TextField>
-                                 <TextArea fx:id="displayBody" editable="false" focusTraversable="false" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="3" GridPane.rowSpan="6">
-                              <font>
-                                 <Font size="14.0" />
-                              </font>
-                           </TextArea>
-                        </children>
-                     </GridPane>
-                       </children>
-                  <padding>
-                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                  </padding>
-               </VBox>
-                 <VBox fx:id="composePanel" alignment="CENTER" prefHeight="400.0" spacing="5.0" style="-fx-background-color: white; -fx-border-color: gray; -fx-background-radius: 5;" visible="false">
-                     <children>
-                     <Label fx:id="labelErrorTo" prefHeight="52.0" prefWidth="431.0" textAlignment="CENTER" textFill="RED" visible="false" VBox.vgrow="ALWAYS" />
-                         <HBox alignment="CENTER_LEFT" prefHeight="74.0" prefWidth="451.0" spacing="5.0" VBox.vgrow="ALWAYS">
-                             <children>
-                                 <Label text="To: " HBox.hgrow="ALWAYS">
-                                     <font>
-                                         <Font name="System Bold" size="16.0" />
-                                     </font>
-                                 </Label>
-                                 <TextField fx:id="toTextField" prefHeight="26.0" prefWidth="363.0" HBox.hgrow="ALWAYS">
-                                     <font>
-                                         <Font size="16.0" />
-                                     </font>
-                                 </TextField>
-                             </children>
-                         </HBox>
-                         <Separator prefWidth="200.0" VBox.vgrow="ALWAYS" />
-                         <Label fx:id="labelErrorSubject" layoutX="21.0" layoutY="21.0" prefHeight="52.0" prefWidth="431.0" textAlignment="CENTER" textFill="RED" visible="false" />
-                         <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" prefHeight="37.0" prefWidth="452.0" spacing="5.0" VBox.vgrow="ALWAYS">
-                             <children>
-                                 <Label text="Subject:  " HBox.hgrow="ALWAYS">
-                                     <font>
-                                         <Font name="System Bold" size="16.0" />
-                                     </font>
-                                 </Label>
-                                 <TextField fx:id="subjectTextField" prefHeight="26.0" prefWidth="363.0" HBox.hgrow="ALWAYS">
-                                     <font>
-                                         <Font size="16.0" />
-                                     </font>
-                                 </TextField>
-                             </children>
-                         </HBox>
-                         <Separator layoutX="10.0" layoutY="251.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
-                         <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="5.0" VBox.vgrow="ALWAYS">
-                             <children>
-                                 <Label text="Body: ">
-                                     <font>
-                                         <Font name="System Bold" size="16.0" />
-                                     </font>
-                                 </Label>
-                                 <TextArea fx:id="bodyTextArea" prefHeight="200.0" prefWidth="200.0" />
-                             </children>
-                         </VBox>
-                         <HBox alignment="CENTER" prefHeight="74.0" prefWidth="451.0" spacing="5.0">
-                            <children>
-                                   <Button mnemonicParsing="false" onAction="#closePanelSendEmail" prefHeight="40.0" prefWidth="115.0" text="Dismiss" textAlignment="CENTER" />
-                               <Button mnemonicParsing="false" onAction="#sendEmail" prefHeight="40.0" prefWidth="115.0" text="Send" textAlignment="CENTER" />
-                            </children>
-                         </HBox>
-                     </children>
-                  <padding>
-                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                  </padding>
-                 </VBox>
-             </AnchorPane>
+            <VBox prefHeight="200.0" prefWidth="100.0">
+               <children>
+                      <VBox alignment="CENTER" style="-fx-background-color: white;" VBox.vgrow="ALWAYS">
+                          <children>
+                        <GridPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS">
+                          <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="Infinity" minWidth="151.6" prefWidth="157.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="Infinity" minWidth="104.20001525878905" prefWidth="157.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="Infinity" minWidth="74.5999847412109" prefWidth="193.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="Infinity" minWidth="125.19999999999999" prefWidth="148.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="291.0" minHeight="10.0" prefHeight="291.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="185.0" minHeight="10.0" prefHeight="42.0" vgrow="SOMETIMES" />
+                              <RowConstraints />
+                          </rowConstraints>
+                           <children>
+                              <ButtonBar prefHeight="40.0" prefWidth="200.0" style="-fx-border-color: transparent transparent gray transparent;" GridPane.columnSpan="4" GridPane.halignment="LEFT">
+                                <buttons>
+                                  <Button mnemonicParsing="false" text="Delete" />
+                                    <Button layoutX="417.0" layoutY="12.0" mnemonicParsing="false" text="Reply" />
+                                    <Button layoutX="337.0" layoutY="91.0" mnemonicParsing="false" text="Reply All" />
+                                    <Button layoutX="337.0" layoutY="12.0" mnemonicParsing="false" text="Forward" />
+                                </buttons>
+                              </ButtonBar>
+                              <TextField fx:id="displayFrom" alignment="CENTER_RIGHT" editable="false" focusTraversable="false" layoutX="10.0" layoutY="72.0" maxWidth="1.7976931348623157E308" mouseTransparent="true" prefHeight="30.0" prefWidth="144.0" style="-fx-text-box-border: transparent; -fx-focus-color: transparent; -fx-border-style: none; -fx-background-color: transparent; -fx-faint-focus-color: transparent;" GridPane.columnSpan="2" GridPane.rowIndex="1">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                              </TextField>
+                                    <TextField fx:id="displayTo" editable="false" focusTraversable="false" prefHeight="53.0" prefWidth="655.0" style="-fx-text-box-border: transparent; -fx-border-style: none; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color: transparent;" GridPane.columnSpan="4" GridPane.rowIndex="2" GridPane.rowSpan="2">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </padding>
+                              </TextField>
+                              <TextField fx:id="displayDate" alignment="CENTER_RIGHT" editable="false" focusTraversable="false" maxWidth="1.7976931348623157E308" mouseTransparent="true" prefHeight="30.0" prefWidth="144.0" style="-fx-text-box-border: transparent; -fx-focus-color: transparent; -fx-border-style: none; -fx-background-color: transparent; -fx-faint-focus-color: transparent;" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="1">
+                                 <font>
+                                    <Font size="15.0" />
+                                 </font>
+                              </TextField>
+                                    <TextArea fx:id="displayBody" editable="false" focusTraversable="false" prefHeight="200.0" prefWidth="200.0" style="-fx-text-box-border: transparent; -fx-border-style: none; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color: transparent;" GridPane.columnSpan="4" GridPane.rowIndex="4" GridPane.rowSpan="3">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </padding>
+                              </TextArea>
+                                <Button focusTraversable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="false" onAction="#showWritePanel" text="Write" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                                <VBox fx:id="composePanel" alignment="CENTER" prefHeight="400.0" spacing="5.0" style="-fx-background-color: yellow; -fx-border-color: gray; -fx-border-radius: 5; -fx-border-width: 2; -fx-background-radius: 5;" visible="false" GridPane.columnSpan="4" GridPane.rowIndex="3" GridPane.rowSpan="6">
+                                    <children>
+                                    <Label fx:id="labelErrorTo" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="true" style="-fx-background-color: blue;" textAlignment="CENTER" textFill="RED" visible="false" VBox.vgrow="ALWAYS">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font></Label>
+                                        <HBox alignment="CENTER_LEFT" prefHeight="74.0" prefWidth="451.0" VBox.vgrow="ALWAYS">
+                                            <children>
+                                                <Label text="To: " HBox.hgrow="ALWAYS">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <TextField fx:id="toTextField" prefHeight="26.0" prefWidth="363.0" HBox.hgrow="ALWAYS">
+                                                    <font>
+                                                        <Font size="16.0" />
+                                                    </font>
+                                                </TextField>
+                                            </children>
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                        </HBox>
+                                        <Separator prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                                        <Label fx:id="labelErrorSubject" focusTraversable="false" layoutX="21.0" layoutY="21.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="true" textAlignment="CENTER" textFill="RED" visible="false">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font></Label>
+                                        <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" prefHeight="37.0" prefWidth="452.0" spacing="5.0" VBox.vgrow="ALWAYS">
+                                            <children>
+                                                <Label text="Subject:  " HBox.hgrow="ALWAYS">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <TextField fx:id="subjectTextField" prefHeight="26.0" prefWidth="363.0" HBox.hgrow="ALWAYS">
+                                                    <font>
+                                                        <Font size="16.0" />
+                                                    </font>
+                                                </TextField>
+                                            </children>
+                                        </HBox>
+                                        <Separator layoutX="10.0" layoutY="251.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                                        <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="5.0" VBox.vgrow="ALWAYS">
+                                            <children>
+                                                <Label text="Body: ">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <TextArea fx:id="bodyTextArea" prefHeight="200.0" prefWidth="200.0" />
+                                            </children>
+                                        </VBox>
+                                        <HBox alignment="CENTER" prefHeight="74.0" prefWidth="451.0" spacing="5.0">
+                                           <children>
+                                                  <Button mnemonicParsing="false" onAction="#closePanelSendEmail" prefHeight="40.0" prefWidth="115.0" text="Dismiss" textAlignment="CENTER" />
+                                              <Button mnemonicParsing="false" onAction="#sendEmail" prefHeight="40.0" prefWidth="115.0" text="Send" textAlignment="CENTER" />
+                                           </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                           </children>
+                        </GridPane>
+                          </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </VBox>
+               </children>
+            </VBox>
             </items>
         </SplitPane>
     </VBox>
