@@ -8,6 +8,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.io.*;
+import java.net.*;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,12 +49,34 @@ public class ViewAuthController {
         if(validate(typedMail)) {
             inbox.setUserMail(typedMail);
             System.out.println("User mail auth: " + inbox.getUserMail());
+            try {
+                Socket socket = new Socket("localhost", 8189);
+                OutputStream outputStream = socket.getOutputStream();
+                PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
+                writer.println(typedMail);
+                // Read the response from the server
+                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                String response = reader.readLine();
+                System.out.println("Risposta dal server: " + response);
+                socket.close(); // close connection
+                if(response.equals("authenticated")){
+                    //access to inbox
+                    stage.setScene(sceneInbox);
+                    // changing min height and width when the scene changes
+                    stage.setMinHeight(730);
+                    stage.setMinWidth(950);
+                    stage.setTitle("Inbox - " + typedMail);
+                }
+                else{
+                    labelError.setVisible(true);
+                    labelError.setText("Email address not preliminary authenticated! Retry");
+                }
 
-            stage.setScene(sceneInbox);
-            // changing min height and width when the scene changes
-            stage.setMinHeight(730);
-            stage.setMinWidth(950);
-            stage.setTitle("Inbox - Home");
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
         else{
             labelError.setVisible(true);
