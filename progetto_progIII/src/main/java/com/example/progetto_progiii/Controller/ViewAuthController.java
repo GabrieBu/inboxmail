@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import com.google.gson.JsonObject;
 
 import java.io.*;
 import java.net.*;
@@ -14,7 +15,7 @@ import java.net.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ViewAuthController {
+public class ViewAuthController{
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
     private Inbox inbox;
@@ -44,8 +45,16 @@ public class ViewAuthController {
         return matcher.matches();
     }
 
+    private String pack(String typedMail){
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("typed_mail_user", typedMail);
+
+        return jsonObject.toString();
+    }
+
     public void handlerOpenInbox(ActionEvent actionEvent) {
         String typedMail = textboxEmail.getText();
+
         if(validate(typedMail)) {
             inbox.setUserMail(typedMail);
             System.out.println("User mail auth: " + inbox.getUserMail());
@@ -53,7 +62,7 @@ public class ViewAuthController {
                 Socket socket = new Socket("localhost", 8189);
                 OutputStream outputStream = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
-                writer.println(typedMail);
+                writer.println(pack(typedMail));
                 // Read the response from the server
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String response = reader.readLine();

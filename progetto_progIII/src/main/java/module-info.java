@@ -4,6 +4,7 @@ module com.example.progetto_progiii {
 
     requires org.kordamp.bootstrapfx.core;
     requires java.desktop;
+    requires com.google.gson;
 
     opens com.example.progetto_progiii to javafx.fxml;
     exports com.example.progetto_progiii;
