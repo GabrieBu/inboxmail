@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -69,7 +70,6 @@ public class ViewInboxController{
         this.inbox = inbox;
         System.out.println("Model Inbox has been initialized [ViewInboxController]");
         textFieldUsermail.textProperty().bind(inbox.userMailProperty());
-        inbox.loadMails();
 
         ObservableList<Inbox.Mail> mailObservableList = inbox.getMails();
         listViewMails.setItems(mailObservableList);
@@ -140,8 +140,9 @@ public class ViewInboxController{
             labelErrorSubject.setText("Subject can not be empty");
             return false;
         }
-
-        Inbox.Mail new_mail = new Inbox.Mail(textFieldUsermail.textProperty().get(), recipients, subjectTextField.textProperty().get(), bodyTextArea.getText());
+        //to delete
+        int id_mail = 1;
+        Inbox.Mail new_mail = new Inbox.Mail(id_mail, textFieldUsermail.textProperty().get(), recipients, subjectTextField.textProperty().get(), bodyTextArea.getText(), LocalDateTime.now());
         inbox.addMail(new_mail);
         System.out.println("New mail has been sent");
         toTextField.clear();

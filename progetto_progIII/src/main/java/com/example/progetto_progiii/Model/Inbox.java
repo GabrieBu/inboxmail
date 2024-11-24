@@ -63,16 +63,6 @@ public class Inbox {
         return false;
     }
 
-    //delete in the prossimo future
-    public void loadMails(){
-        List<String> to = new LinkedList<>();
-        to.add("abc@gmail.com");
-        for(int i = 0; i < 10; i++){
-            Mail newMail = new Mail("a@b.com", to, "Subject" + i, "Body" + i);
-            inbox.add(newMail);
-        }
-    }
-
     public static class Mail{
         private final int idMail;
         private String from;
@@ -81,14 +71,13 @@ public class Inbox {
         private String body;
         private final LocalDateTime date_time;
 
-        public Mail(String from, List<String> to, String subject, String body) {
-            this.idMail = currentIdMail;
+        public Mail(int idMail, String from, List<String> to, String subject, String body, LocalDateTime dateTime) {
+            this.idMail = idMail;
             this.from = from;
             this.to = to; //to_check
             this.subject = subject;
             this.body = body;
-            this.date_time = LocalDateTime.now();
-            currentIdMail++;
+            this.date_time = dateTime;
         }
 
         public int getId() {

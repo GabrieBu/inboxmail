@@ -1,17 +1,24 @@
 package com.example.progetto_progiii.Controller;
 
 import com.example.progetto_progiii.Model.Inbox;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonObject;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import com.google.gson.JsonObject;
+
 
 import java.io.*;
 import java.net.*;
 
+import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,29 +70,46 @@ public class ViewAuthController{
                 OutputStream outputStream = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
                 writer.println(pack(typedMail));
-                // Read the response from the server
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String response = reader.readLine();
-                System.out.println("Risposta dal server: " + response);
-                socket.close(); // close connection
-                if(response.equals("authenticated")){
-                    //access to inbox
+                String responseLine = reader.readLine();
+                socket.close();
+                JsonObject response = JsonParser.parseString(responseLine).getAsJsonObject();
+                if (response.get("authentication").getAsBoolean()) {
+                    JsonElement inboxElement = response.get("inbox");
+                    // Check if "inbox" is a string containing JSON
+                    if (inboxElement.isJsonPrimitive() && inboxElement.getAsJsonPrimitive().isString()) {
+                        String inboxJsonString = inboxElement.getAsString();
+                        // Parse the string into a JsonArray
+                        JsonArray inbox = JsonParser.parseString(inboxJsonString).getAsJsonArray();
+
+                        // Process the JsonArray
+                        for (JsonElement emailElement : inbox) {
+                            JsonObject email = emailElement.getAsJsonObject();
+                            JsonArray toArray = email.get("to").getAsJsonArray(); // Get "to" as JsonArray directly
+                            List<String> listTo = new LinkedList<>();
+                            for(JsonElement elemTo : toArray){
+                                System.out.println(elemTo.getAsString());
+                                listTo.add(elemTo.getAsString());
+                            }
+                            Inbox.Mail mail = new Inbox.Mail(email.get("id").getAsInt(), email.get("from").getAsString(), listTo, email.get("subject").getAsString(), email.get("body").getAsString(), LocalDateTime.now());
+                            this.inbox.getMails().add(mail);
+                        }
+                    } else {
+                        System.err.println("Error: 'inbox' is not a valid JSON string.");
+                    }
                     stage.setScene(sceneInbox);
                     // changing min height and width when the scene changes
                     stage.setMinHeight(730);
                     stage.setMinWidth(950);
                     stage.setTitle("Inbox - " + typedMail);
-                }
-                else{
+                } else {
                     labelError.setVisible(true);
                     labelError.setText("Email address not preliminary authenticated! Retry");
                 }
-
             }
             catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
         else{
             labelError.setVisible(true);
