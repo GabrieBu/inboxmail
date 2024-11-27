@@ -54,8 +54,9 @@ public class ViewAuthController{
 
     private String pack(String typedMail){
         JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", "authentication");
         jsonObject.addProperty("typed_mail_user", typedMail);
-
+        System.out.println(jsonObject);
         return jsonObject.toString();
     }
 
@@ -74,7 +75,7 @@ public class ViewAuthController{
                 String responseLine = reader.readLine();
                 socket.close();
                 JsonObject response = JsonParser.parseString(responseLine).getAsJsonObject();
-                if (response.get("authentication").getAsBoolean()) {
+                if (response.get("authenticated").getAsBoolean()) {
                     JsonElement inboxElement = response.get("inbox");
                     // Check if "inbox" is a string containing JSON
                     if (inboxElement.isJsonPrimitive() && inboxElement.getAsJsonPrimitive().isString()) {
@@ -87,10 +88,9 @@ public class ViewAuthController{
                             JsonObject email = emailElement.getAsJsonObject();
                             JsonArray toArray = email.get("to").getAsJsonArray(); // Get "to" as JsonArray directly
                             List<String> listTo = new LinkedList<>();
-                            for(JsonElement elemTo : toArray){
-                                System.out.println(elemTo.getAsString());
+                            for(JsonElement elemTo : toArray)
                                 listTo.add(elemTo.getAsString());
-                            }
+
                             Inbox.Mail mail = new Inbox.Mail(email.get("id").getAsInt(), email.get("from").getAsString(), listTo, email.get("subject").getAsString(), email.get("body").getAsString(), LocalDateTime.now());
                             this.inbox.getMails().add(mail);
                         }

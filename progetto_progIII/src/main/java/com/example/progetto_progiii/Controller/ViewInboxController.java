@@ -78,7 +78,6 @@ public class ViewInboxController{
             @Override
             protected void updateItem(Inbox.Mail mail, boolean empty) {
                 super.updateItem(mail, empty);
-
                 if (empty || mail == null) {
                     setText(null);
                     setGraphic(null);
