@@ -5,14 +5,13 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Inbox {
-    static int currentIdMail = 0;
-    static int currentSelectedMail = 0; // clicked last time on this object displayed
+    private int currentIdMail;
+    static int currentSelectedMail = -1; // clicked last time on this object displayed (to check -1)
     private final StringProperty userMail = new SimpleStringProperty();
     private final ObservableList<Mail> inbox;
 
@@ -23,6 +22,7 @@ public class Inbox {
     public Inbox(String userMail) {
         setUserMail(userMail);
         this.inbox = FXCollections.observableArrayList();
+        currentIdMail = this.inbox.size();
     }
 
     public Inbox() {
@@ -33,15 +33,17 @@ public class Inbox {
 
     public String getUserMail() {return userMail.get();}
 
+    public int getCurrentIdMail() {return currentIdMail;}
+
     public void setUserMail(String userMail) {this.userMail.set(userMail);}
 
     public Mail getMail(int id){
         return inbox.get(id);
     }
 
-    public void setCurrentSelectedMail(Mail selectedItem) {
+    /*public void setCurrentSelectedMail(Mail selectedItem) {
         currentSelectedMail = selectedItem.getId();
-    }
+    }*/
 
     public Mail getCurrentSelectedMail() {
         return inbox.get(currentSelectedMail);
@@ -51,7 +53,7 @@ public class Inbox {
         this.inbox.add(mail); //O(1) time complexity
     }
 
-    public boolean removeMail(int id){
+    /*public boolean removeMail(int id){
         if(id >= 0 && id < currentIdMail){
             for (Mail mail : inbox) {
                 if (mail.getId() == id) {
@@ -61,27 +63,21 @@ public class Inbox {
             }
         }
         return false;
-    }
+    }*/
 
     public static class Mail{
-        private final int idMail;
         private String from;
         private List<String> to;
         private String subject;
         private String body;
         private final LocalDateTime date_time;
 
-        public Mail(int idMail, String from, List<String> to, String subject, String body, LocalDateTime dateTime) {
-            this.idMail = idMail;
+        public Mail(String from, List<String> to, String subject, String body, LocalDateTime dateTime) {
             this.from = from;
             this.to = to; //to_check
             this.subject = subject;
             this.body = body;
             this.date_time = dateTime;
-        }
-
-        public int getId() {
-            return idMail;
         }
 
         public String getFrom() {

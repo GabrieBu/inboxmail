@@ -91,10 +91,11 @@ public class ViewAuthController{
                             for(JsonElement elemTo : toArray)
                                 listTo.add(elemTo.getAsString());
 
-                            Inbox.Mail mail = new Inbox.Mail(email.get("id").getAsInt(), email.get("from").getAsString(), listTo, email.get("subject").getAsString(), email.get("body").getAsString(), LocalDateTime.now());
+                            Inbox.Mail mail = new Inbox.Mail(email.get("from").getAsString(), listTo, email.get("subject").getAsString(), email.get("body").getAsString(), LocalDateTime.now());
                             this.inbox.getMails().add(mail);
                         }
                     } else {
+                        //handle better the error
                         System.err.println("Error: 'inbox' is not a valid JSON string.");
                     }
                     stage.setScene(sceneInbox);

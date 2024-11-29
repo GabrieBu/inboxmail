@@ -1,6 +1,8 @@
 package com.example.progetto_progiii.Controller;
 
 import com.example.progetto_progiii.Model.Inbox;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -14,6 +16,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
+import java.io.*;
+import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -124,13 +128,15 @@ public class ViewInboxController{
     public boolean sendEmail(ActionEvent actionEvent) {
         labelErrorTo.setVisible(false);
         labelErrorSubject.setVisible(false);
-        List<String> recipients = Arrays.asList(toTextField.getText().split(", "));
+        String[] recipients = toTextField.getText().split(", ");
+        JsonArray toArray = new JsonArray();
         for(String recipient : recipients){
             if(!validate(recipient)) {
                 labelErrorTo.setVisible(true);
                 labelErrorTo.setText("Invalid email address within recipients");
                 return false;
             }
+            toArray.add(recipient);
         }
 
         if(subjectTextField.getText().isEmpty()){
@@ -139,11 +145,34 @@ public class ViewInboxController{
             labelErrorSubject.setText("Subject can not be empty");
             return false;
         }
-        //to delete
-        int id_mail = 1;
+
+        /*int id_mail = 1;
         Inbox.Mail new_mail = new Inbox.Mail(id_mail, textFieldUsermail.textProperty().get(), recipients, subjectTextField.textProperty().get(), bodyTextArea.getText(), LocalDateTime.now());
-        inbox.addMail(new_mail);
-        System.out.println("New mail has been sent");
+        inbox.addMail(new_mail);*/
+
+        JsonObject jsonObject = new JsonObject();
+        JsonObject mailJsonObj = new JsonObject();
+        jsonObject.addProperty("type", "send");
+        jsonObject.addProperty("id", String.valueOf(this.inbox.getCurrentIdMail()));
+        mailJsonObj.addProperty("from", textFieldUsermail.textProperty().get());
+        mailJsonObj.add("to", toArray);
+        mailJsonObj.addProperty("subject", subjectTextField.textProperty().get());
+        mailJsonObj.addProperty("body", bodyTextArea.getText());
+        mailJsonObj.addProperty("date", LocalDateTime.now().toString());
+        jsonObject.add("mail", mailJsonObj);
+        System.out.println(jsonObject);
+        try {
+            Socket socket = new Socket("localhost", 8189);
+            OutputStream outputStream = socket.getOutputStream();
+            PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
+            writer.println(jsonObject);
+            System.out.println(jsonObject.toString());
+            socket.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+
         toTextField.clear();
         subjectTextField.clear();
         bodyTextArea.clear();
