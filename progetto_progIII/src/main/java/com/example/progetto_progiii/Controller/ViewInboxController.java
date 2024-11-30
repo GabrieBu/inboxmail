@@ -103,18 +103,11 @@ public class ViewInboxController{
         listViewMails.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Inbox.Mail>() {
             @Override
             public void changed(ObservableValue<? extends Inbox.Mail> observableValue, Inbox.Mail inbox, Inbox.Mail t1) {
-                Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
+                Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem(); //check se qui o in model
                 displayTo.setText(currentMail.getSubject());
                 displayBody.setText(currentMail.getBody());
                 displayDate.setText(currentMail.getDateFormatted());
                 displayFrom.setText("From: " + currentMail.getFrom());
-            }
-        });
-
-        listViewMails.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                System.out.println("clicked on " + listViewMails.getSelectionModel().getSelectedItem().getSubject());
             }
         });
     }
@@ -145,10 +138,6 @@ public class ViewInboxController{
             labelErrorSubject.setText("Subject can not be empty");
             return false;
         }
-
-        /*int id_mail = 1;
-        Inbox.Mail new_mail = new Inbox.Mail(id_mail, textFieldUsermail.textProperty().get(), recipients, subjectTextField.textProperty().get(), bodyTextArea.getText(), LocalDateTime.now());
-        inbox.addMail(new_mail);*/
 
         JsonObject jsonObject = new JsonObject();
         JsonObject mailJsonObj = new JsonObject();
@@ -188,5 +177,25 @@ public class ViewInboxController{
 
     public void closePanelSendEmail(ActionEvent actionEvent) {
         composePanel.setVisible(false);
+    }
+
+    public void deleteMail(ActionEvent actionEvent) {
+        int indexToRemove = listViewMails.getSelectionModel().getSelectedIndex();
+        String user = listViewMails.getSelectionModel().getSelectedItem().getFrom();
+        inbox.getMails().remove(indexToRemove);
+        try {
+            Socket socket = new Socket("localhost", 8189);
+            OutputStream outputStream = socket.getOutputStream();
+            PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("type", "delete");
+            jsonObject.addProperty("user", user);
+            jsonObject.addProperty("index_to_remove", String.valueOf(indexToRemove));
+            writer.println(jsonObject);
+            socket.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

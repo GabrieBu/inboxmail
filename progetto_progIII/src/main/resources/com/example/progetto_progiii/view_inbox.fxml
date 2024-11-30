@@ -58,7 +58,7 @@
                            <children>
                               <ButtonBar prefHeight="40.0" prefWidth="200.0" style="-fx-border-color: transparent transparent gray transparent;" GridPane.columnSpan="4" GridPane.halignment="LEFT">
                                 <buttons>
-                                  <Button mnemonicParsing="false" text="Delete" />
+                                  <Button mnemonicParsing="false" text="Delete" onAction="#deleteMail"/>
                                     <Button layoutX="417.0" layoutY="12.0" mnemonicParsing="false" text="Reply" />
                                     <Button layoutX="337.0" layoutY="91.0" mnemonicParsing="false" text="Reply All" />
                                     <Button layoutX="337.0" layoutY="12.0" mnemonicParsing="false" text="Forward" />

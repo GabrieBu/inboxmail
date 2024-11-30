@@ -41,10 +41,6 @@ public class Inbox {
         return inbox.get(id);
     }
 
-    /*public void setCurrentSelectedMail(Mail selectedItem) {
-        currentSelectedMail = selectedItem.getId();
-    }*/
-
     public Mail getCurrentSelectedMail() {
         return inbox.get(currentSelectedMail);
     }
@@ -52,18 +48,6 @@ public class Inbox {
     public void addMail(Mail mail){
         this.inbox.add(mail); //O(1) time complexity
     }
-
-    /*public boolean removeMail(int id){
-        if(id >= 0 && id < currentIdMail){
-            for (Mail mail : inbox) {
-                if (mail.getId() == id) {
-                    inbox.remove(mail);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }*/
 
     public static class Mail{
         private String from;
