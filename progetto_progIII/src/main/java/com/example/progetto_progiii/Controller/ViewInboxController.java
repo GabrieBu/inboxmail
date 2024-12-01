@@ -103,11 +103,13 @@ public class ViewInboxController{
         listViewMails.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Inbox.Mail>() {
             @Override
             public void changed(ObservableValue<? extends Inbox.Mail> observableValue, Inbox.Mail inbox, Inbox.Mail t1) {
-                Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem(); //check se qui o in model
-                displayTo.setText(currentMail.getSubject());
-                displayBody.setText(currentMail.getBody());
-                displayDate.setText(currentMail.getDateFormatted());
-                displayFrom.setText("From: " + currentMail.getFrom());
+                Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
+                if(currentMail != null) { //check se qui o model
+                    displayTo.setText(currentMail.getSubject());
+                    displayBody.setText(currentMail.getBody());
+                    displayDate.setText(currentMail.getDateFormatted());
+                    displayFrom.setText("From: " + currentMail.getFrom());
+                }
             }
         });
     }
@@ -181,7 +183,7 @@ public class ViewInboxController{
 
     public void deleteMail(ActionEvent actionEvent) {
         int indexToRemove = listViewMails.getSelectionModel().getSelectedIndex();
-        String user = listViewMails.getSelectionModel().getSelectedItem().getFrom();
+        String user = textFieldUsermail.textProperty().get();
         inbox.getMails().remove(indexToRemove);
         try {
             Socket socket = new Socket("localhost", 8189);
