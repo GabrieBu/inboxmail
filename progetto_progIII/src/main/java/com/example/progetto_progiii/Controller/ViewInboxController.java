@@ -151,7 +151,7 @@ public class ViewInboxController{
         mailJsonObj.addProperty("body", bodyTextArea.getText());
         mailJsonObj.addProperty("date", LocalDateTime.now().toString());
         jsonObject.add("mail", mailJsonObj);
-        System.out.println(jsonObject);
+        System.out.println("send" + jsonObject);
         try {
             Socket socket = new Socket("localhost", 8189);
             OutputStream outputStream = socket.getOutputStream();
