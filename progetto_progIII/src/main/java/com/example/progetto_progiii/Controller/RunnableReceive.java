@@ -17,25 +17,17 @@ public class RunnableReceive implements Runnable {
     }
     @Override
     public void run() {
-
-
-        try (ServerSocket provasoc = new ServerSocket( 8190)){
-
+        try{
+                ServerSocket provasoc = new ServerSocket( 8190);
                 Socket clientSocket = provasoc.accept();
                 System.out.println("Connessione accettata da " + clientSocket.getInetAddress());
 
-                // Esempio di lettura dati dal client
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    System.out.println("Ricevuto: " + inputLine);
-                }
-
-            /*BufferedReader reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             String serverRecString = reader.readLine();
             String boh = unpack(serverRecString);
             System.out.println(boh);
-            sock.close();*/
+            clientSocket.close();
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }finally {
