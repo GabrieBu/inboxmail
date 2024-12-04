@@ -157,7 +157,7 @@ public class ViewInboxController{
             OutputStream outputStream = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
             writer.println(jsonObject);
-            System.out.println(jsonObject.toString());
+            System.out.println(jsonObject);
             socket.close();
         }
         catch (IOException e){
