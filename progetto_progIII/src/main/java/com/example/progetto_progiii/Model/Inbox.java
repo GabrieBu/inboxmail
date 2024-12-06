@@ -14,6 +14,7 @@ public class Inbox {
     static int currentSelectedMail = -1; // clicked last time on this object displayed (to check -1)
     private final StringProperty userMail = new SimpleStringProperty();
     private final ObservableList<Mail> inbox;
+    private int portClient = -1;
 
     public ObservableList<Mail> getMails() {
         return inbox;
@@ -22,7 +23,15 @@ public class Inbox {
     public Inbox(String userMail) {
         setUserMail(userMail);
         this.inbox = FXCollections.observableArrayList();
-        currentIdMail = this.inbox.size();
+        currentIdMail = this.inbox.size(); //non so rick
+    }
+
+    public int getPortClient() {
+        return portClient;
+    }
+
+    public void setPortClient(int portClient) {
+        this.portClient = portClient;
     }
 
     public Inbox() {

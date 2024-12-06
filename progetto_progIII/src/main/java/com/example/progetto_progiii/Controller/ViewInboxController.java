@@ -3,24 +3,25 @@ package com.example.progetto_progiii.Controller;
 import com.example.progetto_progiii.Model.Inbox;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +30,8 @@ public class ViewInboxController{
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     private Inbox inbox;
+    private Future<?> listenerFuture;
+    private final ExecutorService listenerExecutor = Executors.newSingleThreadExecutor();
 
     @FXML
     private TextField toTextField;
@@ -72,7 +75,20 @@ public class ViewInboxController{
             throw new IllegalStateException("The inbox has already been initialized");
         }
         this.inbox = inbox;
-        System.out.println("Model Inbox has been initialized [ViewInboxController]");
+        try (ServerSocket serverSocket = new ServerSocket(0);) {
+            this.inbox.setPortClient(serverSocket.getLocalPort());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (Socket socket = new Socket("localhost", 8189);) {
+            OutputStream outputStream = socket.getOutputStream();
+            PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
+            writer.println(pack(this.inbox.getUserMail(), this.inbox.getPortClient()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         textFieldUsermail.textProperty().bind(inbox.userMailProperty());
 
         ObservableList<Inbox.Mail> mailObservableList = inbox.getMails();
@@ -112,13 +128,22 @@ public class ViewInboxController{
                 }
             }
         });
+
+        startListener();
+    }
+
+    private String pack(String typedMail, int port){
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", "handshake");
+        jsonObject.addProperty("typed_mail_user", typedMail);
+        jsonObject.addProperty("port", String.valueOf(port));
+        return jsonObject.toString();
     }
 
     private boolean validate(String email){
         Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
         return matcher.matches();
     }
-
 
     public boolean sendEmail(ActionEvent actionEvent) {
         labelErrorTo.setVisible(false);
@@ -151,13 +176,12 @@ public class ViewInboxController{
         mailJsonObj.addProperty("body", bodyTextArea.getText());
         mailJsonObj.addProperty("date", LocalDateTime.now().toString());
         jsonObject.add("mail", mailJsonObj);
-        System.out.println("send" + jsonObject);
+
         try {
             Socket socket = new Socket("localhost", 8189);
             OutputStream outputStream = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
             writer.println(jsonObject);
-            System.out.println(jsonObject);
             socket.close();
         }
         catch (IOException e){
@@ -199,5 +223,37 @@ public class ViewInboxController{
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    public void shutdown() {
+        stopListener();
+    }
+
+    public void stopListener() {
+        if (listenerFuture != null && !listenerFuture.isDone()) {
+            listenerFuture.cancel(true); // interrupt the listener thread
+        }
+        listenerExecutor.shutdown();
+        try {
+            if (!listenerExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                listenerExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            listenerExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public void startListener() {
+        if (this.inbox == null) {
+            throw new IllegalStateException("Inbox must be initialized before starting the listener.");
+        }
+        if (this.inbox.getPortClient() <= 0) {
+            throw new IllegalStateException("Invalid portClient value. Listener cannot start.");
+        }
+
+        EmailListenerCallable emailListener = new EmailListenerCallable(inbox);
+        listenerFuture = listenerExecutor.submit(emailListener);
     }
 }

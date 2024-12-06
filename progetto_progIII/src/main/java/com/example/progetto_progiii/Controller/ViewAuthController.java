@@ -19,6 +19,7 @@ import java.net.*;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +29,7 @@ public class ViewAuthController{
     private Inbox inbox;
     private Stage stage;
     private Scene sceneInbox; // Reference to the Inbox scene
+    private ViewInboxController viewInboxController;
 
     @FXML
     private TextField textboxEmail;
@@ -36,13 +38,14 @@ public class ViewAuthController{
     private Label labelError;
 
     @FXML
-    public void initModel(Inbox inbox, Stage stage, Scene sceneInbox) {
+    public void initModel(Inbox inbox, Stage stage, Scene sceneInbox, ViewInboxController viewInboxController) {
         if(this.inbox != null){
             throw new IllegalStateException("The inbox has already been initialized");
         }
         this.inbox = inbox;
         this.stage = stage;
         this.sceneInbox = sceneInbox;
+        this.viewInboxController = viewInboxController;
         labelError.setVisible(false);
         System.out.println("Model Inbox has been initialized [ViewAuthController]");
     }
@@ -56,29 +59,32 @@ public class ViewAuthController{
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("type", "authentication");
         jsonObject.addProperty("typed_mail_user", typedMail);
-        jsonObject.addProperty("port", String.valueOf(port));
+        jsonObject.addProperty("port", port);
+
         System.out.println(jsonObject);
         return jsonObject.toString();
     }
 
     public void handlerOpenInbox(ActionEvent actionEvent) {
         String typedMail = textboxEmail.getText();
-
         if (validate(typedMail)) {
             inbox.setUserMail(typedMail);
-            System.out.println("User mail auth: " + inbox.getUserMail());
-            try (Socket socket = new Socket("localhost", 8189)) {
-                int portClient = socket.getLocalPort();
-                System.out.println("Client is sending through: " + portClient);
+            try ( ServerSocket serverSocket = new ServerSocket(0);) {
 
-                // Send authentication request
+                int portClient = serverSocket.getLocalPort();
+                Socket socket = new Socket("localhost", 8189);
+
+                // Authentication request
                 OutputStream outputStream = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
                 writer.println(pack(typedMail, portClient));
+                socket.close();
+                Socket incomingAuth = serverSocket.accept();
 
-                // Read server response
-                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(incomingAuth.getInputStream()));
                 String responseLine = reader.readLine();
+                incomingAuth.close();
+
                 if (responseLine == null) {
                     System.err.println("Error: No response from server.");
                     labelError.setVisible(true);
@@ -89,8 +95,6 @@ public class ViewAuthController{
                 JsonObject response = JsonParser.parseString(responseLine).getAsJsonObject();
                 if (response.get("authenticated").getAsBoolean()) {
                     JsonElement inboxElement = response.get("inbox");
-
-                    // Process inbox if "inbox" is valid JSON
                     if (inboxElement.isJsonPrimitive() && inboxElement.getAsJsonPrimitive().isString()) {
                         String inboxJsonString = inboxElement.getAsString();
                         JsonArray inboxArray = JsonParser.parseString(inboxJsonString).getAsJsonArray();
@@ -98,22 +102,21 @@ public class ViewAuthController{
                             JsonObject email = emailElement.getAsJsonObject();
                             List<String> listTo = new LinkedList<>();
                             email.get("to").getAsJsonArray().forEach(to -> listTo.add(to.getAsString()));
+                            LocalDateTime date = LocalDateTime.parse(email.get("date").getAsString());
 
                             Inbox.Mail mail = new Inbox.Mail(
                                     email.get("from").getAsString(),
                                     listTo,
                                     email.get("subject").getAsString(),
                                     email.get("body").getAsString(),
-                                    LocalDateTime.now()
+                                    date
                             );
                             this.inbox.getMails().add(mail);
                         }
                     }
 
-                    System.out.println("Authentication successful. Listening on port: " + portClient);
-                    //startEmailListener(portClient);
-
-                    // Change scene to Inbox
+                    // initialize the other view
+                    viewInboxController.initModel(inbox);
                     stage.setScene(sceneInbox);
                     stage.setMinHeight(730);
                     stage.setMinWidth(950);
@@ -123,7 +126,6 @@ public class ViewAuthController{
                     labelError.setText("Email address not authenticated. Retry.");
                 }
             } catch (IOException e) {
-                e.printStackTrace();
                 labelError.setVisible(true);
                 labelError.setText("Connection error. Please try again later.");
             }
@@ -131,28 +133,5 @@ public class ViewAuthController{
             labelError.setVisible(true);
             labelError.setText("Invalid email address.\nCorrect format: abc123@provider.com");
         }
-    }
-
-
-    // Method to listen for incoming emails on the dynamically assigned port
-    private void startEmailListener(int port) {
-        new Thread(() -> {
-            try {
-                ServerSocket serverSocket = new ServerSocket(port);
-                while (true) {
-                    Socket clientSocket = serverSocket.accept();
-                    System.out.println("Wake up!");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    String incomingEmail = reader.readLine();
-
-                    System.out.println("Incoming email: " + incomingEmail);
-                    //JsonObject emailJson = JsonParser.parseString(incomingEmail).getAsJsonObject();
-                    // Add logic to process the email and update inbox
-                    clientSocket.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
     }
 }

@@ -9,6 +9,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 
 public class Main extends Application {
     @Override
@@ -25,8 +30,7 @@ public class Main extends Application {
         ViewAuthController contrAuth = fxmlLoaderAuth.getController();
         ViewInboxController contrInbox = fxmlLoaderInbox.getController();
 
-        contrAuth.initModel(inbox, stage, sceneInbox);
-        contrInbox.initModel(inbox);
+        contrAuth.initModel(inbox, stage, sceneInbox, contrInbox);
         //min width and height will be modified when scene changes
         stage.setMinWidth(400);
         stage.setMinHeight(300);
