@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Inbox {
-    private int currentIdMail;
     static int currentSelectedMail = -1; // clicked last time on this object displayed (to check -1)
     private final StringProperty userMail = new SimpleStringProperty();
     private final ObservableList<Mail> inbox;
@@ -23,7 +22,6 @@ public class Inbox {
     public Inbox(String userMail) {
         setUserMail(userMail);
         this.inbox = FXCollections.observableArrayList();
-        currentIdMail = this.inbox.size(); //non so rick
     }
 
     public int getPortClient() {
@@ -42,21 +40,9 @@ public class Inbox {
 
     public String getUserMail() {return userMail.get();}
 
-    public int getCurrentIdMail() {return currentIdMail;}
 
     public void setUserMail(String userMail) {this.userMail.set(userMail);}
 
-    public Mail getMail(int id){
-        return inbox.get(id);
-    }
-
-    public Mail getCurrentSelectedMail() {
-        return inbox.get(currentSelectedMail);
-    }
-
-    public void addMail(Mail mail){
-        this.inbox.add(mail); //O(1) time complexity
-    }
 
     public static class Mail{
         private String from;

@@ -56,7 +56,7 @@ public class EmailListenerCallable implements Callable<Void> {
         Platform.runLater(() -> {
             Inbox.Mail newMail = parseMessageToMail(message);
             if (newMail != null) {
-                inbox.getMails().add(newMail);
+                inbox.getMails().add(0, newMail);
             }
         });
     }

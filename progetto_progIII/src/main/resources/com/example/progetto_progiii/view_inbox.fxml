@@ -58,9 +58,9 @@
                            <children>
                               <ButtonBar prefHeight="40.0" prefWidth="200.0" style="-fx-border-color: transparent transparent gray transparent;" GridPane.columnSpan="4" GridPane.halignment="LEFT">
                                 <buttons>
-                                  <Button mnemonicParsing="false" text="Delete" onAction="#deleteMail"/>
-                                    <Button layoutX="417.0" layoutY="12.0" mnemonicParsing="false" text="Reply" />
-                                    <Button layoutX="337.0" layoutY="91.0" mnemonicParsing="false" text="Reply All" />
+                                  <Button mnemonicParsing="false" onAction="#deleteMail" text="Delete" />
+                                    <Button layoutX="417.0" layoutY="12.0" mnemonicParsing="false" onAction="#handlerReply" text="Reply" />
+                                    <Button layoutX="337.0" layoutY="91.0" mnemonicParsing="false" text="Reply All" onAction="#handlerReplyAll" />
                                     <Button layoutX="337.0" layoutY="12.0" mnemonicParsing="false" text="Forward" />
                                 </buttons>
                               </ButtonBar>
@@ -147,7 +147,7 @@
                                         <HBox alignment="CENTER" prefHeight="74.0" prefWidth="451.0" spacing="5.0">
                                            <children>
                                                   <Button mnemonicParsing="false" onAction="#closePanelSendEmail" prefHeight="40.0" prefWidth="115.0" text="Dismiss" textAlignment="CENTER" />
-                                              <Button mnemonicParsing="false" onAction="#sendEmail" prefHeight="40.0" prefWidth="115.0" text="Send" textAlignment="CENTER" />
+                                              <Button mnemonicParsing="false" onAction="#handlerSend" prefHeight="40.0" prefWidth="115.0" text="Send" textAlignment="CENTER" />
                                            </children>
                                         </HBox>
                                     </children>

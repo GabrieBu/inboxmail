@@ -18,6 +18,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -145,7 +146,7 @@ public class ViewInboxController{
         return matcher.matches();
     }
 
-    public boolean sendEmail(ActionEvent actionEvent) {
+    public void handlerSend(ActionEvent actionEvent) {
         labelErrorTo.setVisible(false);
         labelErrorSubject.setVisible(false);
         String[] recipients = toTextField.getText().split(", ");
@@ -154,7 +155,7 @@ public class ViewInboxController{
             if(!validate(recipient)) {
                 labelErrorTo.setVisible(true);
                 labelErrorTo.setText("Invalid email address within recipients");
-                return false;
+                return;
             }
             toArray.add(recipient);
         }
@@ -163,13 +164,12 @@ public class ViewInboxController{
             labelErrorTo.setVisible(false);
             labelErrorSubject.setVisible(true);
             labelErrorSubject.setText("Subject can not be empty");
-            return false;
+            return;
         }
 
         JsonObject jsonObject = new JsonObject();
         JsonObject mailJsonObj = new JsonObject();
         jsonObject.addProperty("type", "send");
-        jsonObject.addProperty("id", String.valueOf(this.inbox.getCurrentIdMail()));
         mailJsonObj.addProperty("from", textFieldUsermail.textProperty().get());
         mailJsonObj.add("to", toArray);
         mailJsonObj.addProperty("subject", subjectTextField.textProperty().get());
@@ -194,7 +194,6 @@ public class ViewInboxController{
         labelErrorTo.setVisible(false);
         labelErrorSubject.setVisible(false);
         composePanel.setVisible(false);
-        return true;
     }
 
     public void showWritePanel(ActionEvent actionEvent) {
@@ -255,5 +254,74 @@ public class ViewInboxController{
 
         EmailListenerCallable emailListener = new EmailListenerCallable(inbox);
         listenerFuture = listenerExecutor.submit(emailListener);
+    }
+
+    public void handlerReply(ActionEvent actionEvent) {
+        showWritePanel(actionEvent);
+
+        Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
+        JsonArray toArray = new JsonArray();
+        toArray.add(currentMail.getFrom());
+        JsonObject jsonObject = new JsonObject();
+        JsonObject mailJsonObj = new JsonObject();
+        jsonObject.addProperty("type", "reply");
+        mailJsonObj.addProperty("from", this.inbox.getUserMail());
+        mailJsonObj.add("to", toArray);
+        mailJsonObj.addProperty("subject", currentMail.getSubject() + "REPLY");
+        mailJsonObj.addProperty("body", currentMail.getBody());
+        mailJsonObj.addProperty("date", LocalDateTime.now().toString());
+        jsonObject.add("mail", mailJsonObj);
+        System.out.println(jsonObject);
+
+        try{
+            Socket socket = new Socket("localhost", 8189);
+            OutputStream outputStream = socket.getOutputStream();
+            PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
+            writer.println(jsonObject);
+            socket.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void handlerReplyAll(ActionEvent actionEvent) {
+        Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
+        JsonArray toArray = convertToJsonArray(currentMail.getTo(), this.inbox.getUserMail());
+        toArray.add(currentMail.getFrom());
+        JsonObject jsonObject = new JsonObject();
+        JsonObject mailJsonObj = new JsonObject();
+        jsonObject.addProperty("type", "reply_all");
+        mailJsonObj.addProperty("from", this.inbox.getUserMail());
+        mailJsonObj.add("to", toArray);
+        mailJsonObj.addProperty("subject", currentMail.getSubject() + "REPLYALL");
+        mailJsonObj.addProperty("body", currentMail.getBody());
+        mailJsonObj.addProperty("date", LocalDateTime.now().toString());
+        jsonObject.add("mail", mailJsonObj);
+
+        try{
+            Socket socket = new Socket("localhost", 8189);
+            OutputStream outputStream = socket.getOutputStream();
+            PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
+            writer.println(jsonObject);
+            socket.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public JsonArray convertToJsonArray(List<String> toList, String currentUserMail) {
+        JsonArray jsonArray = new JsonArray();
+
+        if (toList != null) {
+            for (String str : toList) {
+                System.out.println(str + "added!");
+                if (!currentUserMail.equals(str)) {
+                    jsonArray.add(str);
+                }
+            }
+        }
+        return jsonArray;
     }
 }
