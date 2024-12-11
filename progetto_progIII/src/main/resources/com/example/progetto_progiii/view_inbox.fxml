@@ -60,8 +60,8 @@
                                 <buttons>
                                   <Button mnemonicParsing="false" onAction="#deleteMail" text="Delete" />
                                     <Button layoutX="417.0" layoutY="12.0" mnemonicParsing="false" onAction="#handlerReply" text="Reply" />
-                                    <Button layoutX="337.0" layoutY="91.0" mnemonicParsing="false" text="Reply All" onAction="#handlerReplyAll" />
-                                    <Button layoutX="337.0" layoutY="12.0" mnemonicParsing="false" text="Forward" />
+                                    <Button layoutX="337.0" layoutY="91.0" mnemonicParsing="false" onAction="#handlerReplyAll" text="Reply All" />
+                                    <Button layoutX="337.0" layoutY="12.0" mnemonicParsing="false" onAction="#handlerForward" text="Forward" />
                                 </buttons>
                               </ButtonBar>
                               <TextField fx:id="displayFrom" alignment="CENTER_RIGHT" editable="false" focusTraversable="false" layoutX="10.0" layoutY="72.0" maxWidth="1.7976931348623157E308" mouseTransparent="true" prefHeight="30.0" prefWidth="144.0" style="-fx-text-box-border: transparent; -fx-focus-color: transparent; -fx-border-style: none; -fx-background-color: transparent; -fx-faint-focus-color: transparent;" GridPane.columnSpan="2" GridPane.rowIndex="1">

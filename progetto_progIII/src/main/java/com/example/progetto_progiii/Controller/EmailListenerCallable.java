@@ -30,12 +30,12 @@ public class EmailListenerCallable implements Callable<Void> {
     public Void call() {
         int port = inbox.getPortClient();
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Client istening on port " + port);
             while (running) {
                 try {
-                    Socket clientSocket = serverSocket.accept(); // Wait for a client
+                    Socket clientSocket = serverSocket.accept(); // Wait for server
                     BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     String response = reader.readLine();
+                    System.out.println(response);
                     processIncomingMessage(response);
                     clientSocket.close();
                 } catch (Exception e) {
@@ -53,16 +53,23 @@ public class EmailListenerCallable implements Callable<Void> {
     }
 
     private void processIncomingMessage(String message) {
-        Platform.runLater(() -> {
-            Inbox.Mail newMail = parseMessageToMail(message);
-            if (newMail != null) {
-                inbox.getMails().add(0, newMail);
-            }
-        });
+        JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
+        String typeReq = jsonMessage.get("type").getAsString();
+        if(typeReq.equals("send") || typeReq.equals("reply") || typeReq.equals("reply_all")) {
+            Platform.runLater(() -> {
+                Inbox.Mail newMail = parseMessageToMail(jsonMessage);
+                if (newMail != null) {
+                    inbox.getMails().add(0, newMail);
+                }
+            });
+        }
+        else if(typeReq.equals("send_error")) {
+            //fare qualcosa per displayare
+            System.out.println(jsonMessage);
+        }
     }
 
-    private Inbox.Mail parseMessageToMail(String message) {
-        JsonObject mail = JsonParser.parseString(message).getAsJsonObject();
+    private Inbox.Mail parseMessageToMail(JsonObject mail) {
         JsonElement emailElement = mail.get("mail");
         try {
             JsonObject email = emailElement.getAsJsonObject();

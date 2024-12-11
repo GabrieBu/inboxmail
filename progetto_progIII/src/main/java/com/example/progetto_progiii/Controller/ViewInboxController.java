@@ -271,7 +271,6 @@ public class ViewInboxController{
         mailJsonObj.addProperty("body", currentMail.getBody());
         mailJsonObj.addProperty("date", LocalDateTime.now().toString());
         jsonObject.add("mail", mailJsonObj);
-        System.out.println(jsonObject);
 
         try{
             Socket socket = new Socket("localhost", 8189);
@@ -323,5 +322,9 @@ public class ViewInboxController{
             }
         }
         return jsonArray;
+    }
+
+    public void handlerForward(ActionEvent actionEvent) {
+
     }
 }
