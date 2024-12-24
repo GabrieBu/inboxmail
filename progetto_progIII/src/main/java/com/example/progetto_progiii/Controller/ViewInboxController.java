@@ -13,7 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
+import javafx.stage.WindowEvent;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -69,6 +69,7 @@ public class ViewInboxController{
 
     @FXML
     private Label labelErrorSubject;
+
 
     @FXML
     public void initModel(Inbox inbox) {
@@ -131,6 +132,9 @@ public class ViewInboxController{
         });
 
         startListener();
+        //ServerConnection();
+        
+
     }
 
     private String pack(String typedMail, int port){
@@ -225,8 +229,11 @@ public class ViewInboxController{
     }
 
     @FXML
-    public void shutdown() {
+    public void shutdown(WindowEvent event) {
+        //inviare un messaggio al server per far cancellare il valore dalla hashmap
+        System.out.println("Shutting down the client and the connection to the server...");
         stopListener();
+        stopServerCheckConnection();
     }
 
     public void stopListener() {
@@ -255,11 +262,33 @@ public class ViewInboxController{
         EmailListenerCallable emailListener = new EmailListenerCallable(inbox);
         listenerFuture = listenerExecutor.submit(emailListener);
     }
+   //checkServer
+    public void ServerConnection(){
+        if (this.inbox == null) {
+            throw new IllegalStateException("Inbox must be initialized before starting the listener.");
+        }
+
+        ServerCheckerCallable ServerConnection= new ServerCheckerCallable(8189,inbox);
+        listenerFuture=listenerExecutor.submit(ServerConnection);
+    }
+
+    public void stopServerCheckConnection() {
+
+    }
 
     public void handlerReply(ActionEvent actionEvent) {
         showWritePanel(actionEvent);
 
+
+        //gestione panel
         Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
+        textFieldUsermail.setText(this.inbox.getUserMail());
+        toTextField.setText(currentMail.getFrom());
+        subjectTextField.setText("Re: " + currentMail.getSubject());
+        subjectTextField.setEditable(false);
+        String pastBody = bodyTextArea.getText();
+        bodyTextArea.clear();
+
         JsonArray toArray = new JsonArray();
         toArray.add(currentMail.getFrom());
         JsonObject jsonObject = new JsonObject();
@@ -268,7 +297,7 @@ public class ViewInboxController{
         mailJsonObj.addProperty("from", this.inbox.getUserMail());
         mailJsonObj.add("to", toArray);
         mailJsonObj.addProperty("subject", currentMail.getSubject() + "REPLY");
-        mailJsonObj.addProperty("body", currentMail.getBody());
+        mailJsonObj.addProperty("body",pastBody +"\n\n\n Response: "+ currentMail.getBody());
         mailJsonObj.addProperty("date", LocalDateTime.now().toString());
         jsonObject.add("mail", mailJsonObj);
 
@@ -325,6 +354,16 @@ public class ViewInboxController{
     }
 
     public void handlerForward(ActionEvent actionEvent) {
+        showWritePanel(actionEvent);
+
+        Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
+        if (currentMail != null) {
+            bodyTextArea.setText(currentMail.getBody());
+            subjectTextField.setText(currentMail.getSubject());
+            subjectTextField.setEditable(false);
+            bodyTextArea.setEditable(false);
+            toTextField.clear();
+        }
 
     }
 }

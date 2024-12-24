@@ -121,6 +121,7 @@ public class ViewAuthController{
                     stage.setMinHeight(730);
                     stage.setMinWidth(950);
                     stage.setTitle("Inbox - " + typedMail);
+                    stage.setOnCloseRequest(event -> viewInboxController.shutdown(event));
                 } else {
                     labelError.setVisible(true);
                     labelError.setText("Email address not authenticated. Retry.");
