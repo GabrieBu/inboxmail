@@ -18,11 +18,10 @@ public class ServerCheckerCallable implements Callable<Void> {
     private final Inbox inbox;
     private Boolean SavedConnection=false;
 
-    public ServerCheckerCallable(int port,Inbox inbox) {
+    public ServerCheckerCallable(int port, Inbox inbox) {
         this.port = port;
         this.inbox= inbox;
     }
-
 
     public Void call() {
         while (running) {
@@ -43,7 +42,7 @@ public class ServerCheckerCallable implements Callable<Void> {
                 break;
             }
         }
-            return null;
+        return null;
     }
 
 

@@ -33,6 +33,7 @@ public class ViewInboxController{
     private Inbox inbox;
     private Future<?> listenerFuture;
     private final ExecutorService listenerExecutor = Executors.newSingleThreadExecutor();
+    private String STATE_FUNC = "";
 
     @FXML
     private TextField toTextField;
@@ -133,8 +134,6 @@ public class ViewInboxController{
 
         startListener();
         //ServerConnection();
-        
-
     }
 
     private String pack(String typedMail, int port){
@@ -151,6 +150,7 @@ public class ViewInboxController{
     }
 
     public void handlerSend(ActionEvent actionEvent) {
+        //in base a STATE_FUNC fai robe
         labelErrorTo.setVisible(false);
         labelErrorSubject.setVisible(false);
         String[] recipients = toTextField.getText().split(", ");
@@ -181,16 +181,7 @@ public class ViewInboxController{
         mailJsonObj.addProperty("date", LocalDateTime.now().toString());
         jsonObject.add("mail", mailJsonObj);
 
-        try {
-            Socket socket = new Socket("localhost", 8189);
-            OutputStream outputStream = socket.getOutputStream();
-            PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
-            writer.println(jsonObject);
-            socket.close();
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
+        writeOnSocket(jsonObject);
 
         toTextField.clear();
         subjectTextField.clear();
@@ -201,6 +192,8 @@ public class ViewInboxController{
     }
 
     public void showWritePanel(ActionEvent actionEvent) {
+        this.setSTATE_FUNC("send");
+        clearAndEnable();
         composePanel.setVisible(true);
     }
 
@@ -234,6 +227,7 @@ public class ViewInboxController{
         System.out.println("Shutting down the client and the connection to the server...");
         stopListener();
         stopServerCheckConnection();
+        Platform.exit();
     }
 
     public void stopListener() {
@@ -262,6 +256,7 @@ public class ViewInboxController{
         EmailListenerCallable emailListener = new EmailListenerCallable(inbox);
         listenerFuture = listenerExecutor.submit(emailListener);
     }
+
    //checkServer
     public void ServerConnection(){
         if (this.inbox == null) {
@@ -277,17 +272,20 @@ public class ViewInboxController{
     }
 
     public void handlerReply(ActionEvent actionEvent) {
-        showWritePanel(actionEvent);
-
-
-        //gestione panel
+        clearAndEnable();
+        composePanel.setVisible(true);
         Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
-        textFieldUsermail.setText(this.inbox.getUserMail());
-        toTextField.setText(currentMail.getFrom());
-        subjectTextField.setText("Re: " + currentMail.getSubject());
-        subjectTextField.setEditable(false);
+
+        if(currentMail != null) {
+            this.setSTATE_FUNC("reply");
+            toTextField.setText(currentMail.getFrom());
+            toTextField.setEditable(false);
+            subjectTextField.setText("Re:" + currentMail.getSubject());
+            subjectTextField.setEditable(false);
+        }
+        //reply
         String pastBody = bodyTextArea.getText();
-        bodyTextArea.clear();
+        bodyTextArea.setText("\n\n\n" + pastBody);
 
         JsonArray toArray = new JsonArray();
         toArray.add(currentMail.getFrom());
@@ -296,11 +294,15 @@ public class ViewInboxController{
         jsonObject.addProperty("type", "reply");
         mailJsonObj.addProperty("from", this.inbox.getUserMail());
         mailJsonObj.add("to", toArray);
-        mailJsonObj.addProperty("subject", currentMail.getSubject() + "REPLY");
-        mailJsonObj.addProperty("body",pastBody +"\n\n\n Response: "+ currentMail.getBody());
+        mailJsonObj.addProperty("subject", subjectTextField.getText());
+        mailJsonObj.addProperty("body", bodyTextArea.getText());
         mailJsonObj.addProperty("date", LocalDateTime.now().toString());
         jsonObject.add("mail", mailJsonObj);
 
+        writeOnSocket(jsonObject);
+    }
+
+    private static void writeOnSocket(JsonObject jsonObject){
         try{
             Socket socket = new Socket("localhost", 8189);
             OutputStream outputStream = socket.getOutputStream();
@@ -313,8 +315,38 @@ public class ViewInboxController{
         }
     }
 
+    private void clearAndEnable(){
+        toTextField.clear();
+        toTextField.setEditable(true);
+        subjectTextField.clear();
+        subjectTextField.setEditable(true);
+        bodyTextArea.clear();
+        bodyTextArea.setEditable(true);
+    }
+
     public void handlerReplyAll(ActionEvent actionEvent) {
+        clearAndEnable();
+        composePanel.setVisible(true);
+
         Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
+        if(currentMail != null) {
+            this.setSTATE_FUNC("reply_all");
+            List<String> recipients = currentMail.getTo();
+            StringBuilder newTo = new StringBuilder();
+            for(String mail : recipients){
+                if(!mail.equals(this.inbox.getUserMail()))
+                    newTo.append(mail).append(", ");
+            }
+            newTo.append(currentMail.getFrom());
+            toTextField.setText(newTo.toString());
+            toTextField.setEditable(false);
+            subjectTextField.setText("Re:" + currentMail.getSubject());
+            subjectTextField.setEditable(false);
+        }
+        //non va
+        String pastBody = bodyTextArea.getText();
+        bodyTextArea.setText("\n\n\n" + pastBody);
+
         JsonArray toArray = convertToJsonArray(currentMail.getTo(), this.inbox.getUserMail());
         toArray.add(currentMail.getFrom());
         JsonObject jsonObject = new JsonObject();
@@ -322,21 +354,12 @@ public class ViewInboxController{
         jsonObject.addProperty("type", "reply_all");
         mailJsonObj.addProperty("from", this.inbox.getUserMail());
         mailJsonObj.add("to", toArray);
-        mailJsonObj.addProperty("subject", currentMail.getSubject() + "REPLYALL");
-        mailJsonObj.addProperty("body", currentMail.getBody());
+        mailJsonObj.addProperty("subject", subjectTextField.getText());
+        mailJsonObj.addProperty("body", bodyTextArea.getText());
         mailJsonObj.addProperty("date", LocalDateTime.now().toString());
         jsonObject.add("mail", mailJsonObj);
 
-        try{
-            Socket socket = new Socket("localhost", 8189);
-            OutputStream outputStream = socket.getOutputStream();
-            PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
-            writer.println(jsonObject);
-            socket.close();
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
+        writeOnSocket(jsonObject);
     }
 
     public JsonArray convertToJsonArray(List<String> toList, String currentUserMail) {
@@ -354,8 +377,9 @@ public class ViewInboxController{
     }
 
     public void handlerForward(ActionEvent actionEvent) {
-        showWritePanel(actionEvent);
-
+        this.setSTATE_FUNC("forward");
+        clearAndEnable();
+        composePanel.setVisible(true);
         Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
         if (currentMail != null) {
             bodyTextArea.setText(currentMail.getBody());
@@ -364,6 +388,13 @@ public class ViewInboxController{
             bodyTextArea.setEditable(false);
             toTextField.clear();
         }
+    }
 
+    public String getSTATE_FUNC() {
+        return STATE_FUNC;
+    }
+
+    public void setSTATE_FUNC(String STATE_FUNC) {
+        this.STATE_FUNC = STATE_FUNC;
     }
 }
