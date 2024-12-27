@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.stage.WindowEvent;
 import java.io.*;
 import java.net.ServerSocket;
@@ -33,10 +34,13 @@ public class ViewInboxController{
 
     private Inbox inbox;
     private Future<?> listenerFuture;
-    private final ExecutorService listenerExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService listenerExecutor = Executors.newFixedThreadPool(2);
     private String STATE_FUNC = "";
     @FXML
     private TextField toTextField;
+
+    @FXML
+    private TextField textFieldProva;
 
     @FXML
     private TextField subjectTextField;
@@ -70,6 +74,9 @@ public class ViewInboxController{
 
     @FXML
     private Label labelErrorSubject;
+
+    @FXML
+    private Circle statusCircle;
 
 
     @FXML
@@ -135,7 +142,7 @@ public class ViewInboxController{
         });
 
         startListener();
-        //ServerConnection();
+        ServerConnection(textFieldProva, statusCircle);
     }
 
     private String pack(String typedMail, int port){
@@ -152,7 +159,6 @@ public class ViewInboxController{
     }
 
     public void handlerSend(ActionEvent actionEvent) {
-        //in base a STATE_FUNC fai robe
         labelErrorTo.setVisible(false);
         labelErrorSubject.setVisible(false);
         String[] recipients = toTextField.getText().split(", ");
@@ -160,7 +166,7 @@ public class ViewInboxController{
         for(String recipient : recipients){
             if(!validate(recipient)) {
                 labelErrorTo.setVisible(true);
-                labelErrorTo.setText("Invalid email address within recipients");
+                labelErrorTo.setText("Invalid email addresses within recipients");
                 return;
             }
             toArray.add(recipient);
@@ -175,6 +181,7 @@ public class ViewInboxController{
         JsonObject jsonObject = new JsonObject();
         JsonObject mailJsonObj = new JsonObject();
         System.out.println("State function: " + STATE_FUNC);
+
         switch(STATE_FUNC){
             case "send":
                 jsonObject.addProperty("type", "send");
@@ -209,8 +216,6 @@ public class ViewInboxController{
             default:
                 throw new IllegalStateException("Unexpected value: " + STATE_FUNC);
         }
-
-
 
         writeOnSocket(jsonObject);
 
@@ -294,14 +299,13 @@ public class ViewInboxController{
         listenerFuture = listenerExecutor.submit(emailListener);
     }
 
-   //checkServer
-    public void ServerConnection(){
+    public void ServerConnection(TextField textFieldProva, Circle statusCircle) {
         if (this.inbox == null) {
             throw new IllegalStateException("Inbox must be initialized before starting the listener.");
         }
 
-        ServerCheckerCallable ServerConnection= new ServerCheckerCallable(8189,inbox);
-        listenerFuture=listenerExecutor.submit(ServerConnection);
+        ServerCheckerCallable ServerChecker= new ServerCheckerCallable(8189, textFieldProva, statusCircle);
+        listenerFuture=listenerExecutor.submit(ServerChecker);
     }
 
     public void stopServerCheckConnection() {

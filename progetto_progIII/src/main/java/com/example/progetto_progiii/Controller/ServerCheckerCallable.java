@@ -1,44 +1,60 @@
 package com.example.progetto_progiii.Controller;
 
-import com.example.progetto_progiii.Model.Inbox;
-import javafx.application.Platform;
+import com.google.gson.JsonObject;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.ServerSocket;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
-import java.time.LocalDateTime;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 public class ServerCheckerCallable implements Callable<Void> {
     private volatile boolean running = true;
     private final int port;
-    private final Inbox inbox;
-    private Boolean SavedConnection=false;
+    private final BooleanProperty connectionState = new SimpleBooleanProperty();
+    private Boolean stateConnection = false;
+    private TextField textField;
+    private Circle statusCirlce;
 
-    public ServerCheckerCallable(int port, Inbox inbox) {
+    public ServerCheckerCallable(int port, TextField textFieldProva, Circle statusCircle) {
         this.port = port;
-        this.inbox= inbox;
+        textField = textFieldProva;
+        this.statusCirlce = statusCircle;
+        // textField.textProperty().bind(stateConnectionProperty);
+
+        connectionState.addListener((observable, oldValue, newValue) -> {
+            statusCircle.setFill(newValue ? Color.GREEN : Color.RED);
+        });
+
+        // Initial fill color
+        statusCircle.setFill(Color.RED);
     }
 
     public Void call() {
         while (running) {
-            try (Socket socket = new Socket("localhost ", port);
-                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-                System.out.println("Connesso al server con successo");
+            try (Socket socket = new Socket("localhost", port)){
+                //ping the server
+                OutputStream outputStream = socket.getOutputStream();
+                PrintWriter writer = new PrintWriter(outputStream, true);
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("type", "ping");
+                writer.println(jsonObject);
+                socket.close();
                 updateServerConnection(true);
             } catch (Exception e) {
-                System.out.println("Errore durante la connessione al server: " + e.getMessage());
                 updateServerConnection(false);
             }
-            // Timer di 2 secondi b
+            // Timer di 10 secondi b
             try {
-                Thread.sleep(2000);
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 System.out.println("Thread interrotto: " + e.getMessage());
+                // chiusura client peffò
                 break;
             }
         }
@@ -46,10 +62,12 @@ public class ServerCheckerCallable implements Callable<Void> {
     }
 
 
-    private void updateServerConnection (Boolean Connection){
-        if (Connection!=SavedConnection) {
-            System.out.println("Stato connessione aggiornato: " + (Connection ? "Online" : "Offline"));
-            // Implementazione per aggiornare l'inbox
+    private void updateServerConnection (Boolean connection){
+        if (connection != connectionState.get()) {
+            connectionState.set(connection);
+            textField.setEditable(true);
+            textField.setText(connectionState.get() ? "Online" : "Offline");
+            textField.setEditable(false);
         }
     }
 }

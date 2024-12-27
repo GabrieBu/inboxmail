@@ -4,6 +4,7 @@
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
 <StackPane style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.progetto_progiii.Controller.ViewInboxController">
@@ -11,21 +12,31 @@
         <padding>
             <Insets bottom="20.0" left="20.0" right="30.0" top="20.0" />
         </padding>
-      <VBox prefHeight="50.0" prefWidth="888.0">
+      <HBox prefHeight="35.0" prefWidth="918.0">
          <children>
+            <Circle fx:id="statusCircle" fill="#eeeeee" radius="16.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
+            <Label prefHeight="38.0" prefWidth="147.0" text="Stato connessione" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Label>
+            <TextField fx:id="textFieldProva" editable="false" prefHeight="29.0" prefWidth="160.0">
+               <HBox.margin>
+                  <Insets top="3.0" />
+               </HBox.margin></TextField>
             <TextField fx:id="textFieldUsermail" alignment="CENTER" editable="false" focusTraversable="false" mouseTransparent="true" prefHeight="29.0">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
+               <HBox.margin>
+                  <Insets left="5.0" top="3.0" />
+               </HBox.margin>
                         </TextField>
          </children>
-         <padding>
-            <Insets bottom="10.0" top="10.0" />
-         </padding>
-      </VBox>
+      </HBox>
         <SplitPane dividerPositions="0.5" style="-fx-background-color: white; -fx-border-color: gray;" VBox.vgrow="ALWAYS">
             <items>
                 <ListView id="listViewInbox" fx:id="listViewMails" editable="true" prefWidth="258.0">
