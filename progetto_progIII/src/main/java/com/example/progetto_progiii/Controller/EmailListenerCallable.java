@@ -35,7 +35,6 @@ public class EmailListenerCallable implements Callable<Void> {
                     Socket clientSocket = serverSocket.accept(); // Wait for server
                     BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     String response = reader.readLine();
-                    System.out.println(response);
                     processIncomingMessage(response);
                     clientSocket.close();
                 } catch (Exception e) {

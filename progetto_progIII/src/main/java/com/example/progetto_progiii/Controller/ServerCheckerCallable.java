@@ -24,13 +24,12 @@ public class ServerCheckerCallable implements Callable<Void> {
         this.port = port;
         textField = textFieldProva;
         this.statusCirlce = statusCircle;
-        // textField.textProperty().bind(stateConnectionProperty);
 
         connectionState.addListener((observable, oldValue, newValue) -> {
             statusCircle.setFill(newValue ? Color.GREEN : Color.RED);
         });
 
-        // Initial fill color
+        // initial fill color
         statusCircle.setFill(Color.RED);
     }
 
@@ -48,13 +47,13 @@ public class ServerCheckerCallable implements Callable<Void> {
             } catch (Exception e) {
                 updateServerConnection(false);
             }
-            // Timer di 10 secondi b
+            // Timer di 10 secondi
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 System.out.println("Thread interrotto: " + e.getMessage());
-                // chiusura client peffò
+                // chiusura client pefforza
                 break;
             }
         }

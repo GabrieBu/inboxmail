@@ -405,10 +405,6 @@ public class ViewInboxController{
         }
     }
 
-    public String getSTATE_FUNC() {
-        return STATE_FUNC;
-    }
-
     public void setSTATE_FUNC(String STATE_FUNC) {
         this.STATE_FUNC = STATE_FUNC;
     }

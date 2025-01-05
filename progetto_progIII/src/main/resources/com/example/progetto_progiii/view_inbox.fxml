@@ -23,7 +23,7 @@
                   <Insets left="10.0" />
                </HBox.margin>
             </Label>
-            <TextField fx:id="textFieldProva" editable="false" prefHeight="29.0" prefWidth="160.0">
+            <TextField fx:id="textFieldProva" editable="false" focusTraversable="false" prefHeight="29.0" prefWidth="160.0">
                <HBox.margin>
                   <Insets top="3.0" />
                </HBox.margin></TextField>
@@ -69,10 +69,10 @@
                            <children>
                               <ButtonBar prefHeight="40.0" prefWidth="200.0" style="-fx-border-color: transparent transparent gray transparent;" GridPane.columnSpan="4" GridPane.halignment="LEFT">
                                 <buttons>
-                                  <Button mnemonicParsing="false" onAction="#deleteMail" text="Delete" />
-                                    <Button layoutX="417.0" layoutY="12.0" mnemonicParsing="false" onAction="#handlerReply" text="Reply" />
-                                    <Button layoutX="337.0" layoutY="91.0" mnemonicParsing="false" onAction="#handlerReplyAll" text="Reply All" />
-                                    <Button layoutX="337.0" layoutY="12.0" mnemonicParsing="false" onAction="#handlerForward" text="Forward" />
+                                  <Button mnemonicParsing="false" onAction="#deleteMail" style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-size: 14px; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Delete" />
+                                    <Button layoutX="417.0" layoutY="12.0" mnemonicParsing="false" onAction="#handlerReply" style="-fx-background-color: #f0f0f0; -fx-text-fill: #333333; -fx-font-size: 14px; -fx-border-color: #cccccc; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Reply" />
+                                    <Button layoutX="337.0" layoutY="91.0" mnemonicParsing="false" onAction="#handlerReplyAll" style="-fx-background-color: #f0f0f0; -fx-text-fill: #333333; -fx-font-size: 14px; -fx-border-color: #cccccc; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Reply All" />
+                                    <Button layoutX="337.0" layoutY="12.0" mnemonicParsing="false" onAction="#handlerForward" style="-fx-background-color: #f0f0f0; -fx-text-fill: #333333; -fx-font-size: 14px; -fx-border-color: #cccccc; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Forward" />
                                 </buttons>
                               </ButtonBar>
                               <TextField fx:id="displayFrom" alignment="CENTER_RIGHT" editable="false" focusTraversable="false" layoutX="10.0" layoutY="72.0" maxWidth="1.7976931348623157E308" mouseTransparent="true" prefHeight="30.0" prefWidth="144.0" style="-fx-text-box-border: transparent; -fx-focus-color: transparent; -fx-border-style: none; -fx-background-color: transparent; -fx-faint-focus-color: transparent;" GridPane.columnSpan="2" GridPane.rowIndex="1">
@@ -101,8 +101,8 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </padding>
                               </TextArea>
-                                <Button focusTraversable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="false" onAction="#showWritePanel" text="Write" GridPane.columnIndex="3" GridPane.rowIndex="7" />
-                                <VBox fx:id="composePanel" alignment="CENTER" prefHeight="400.0" spacing="5.0" style="-fx-background-color: yellow; -fx-border-color: gray; -fx-border-radius: 5; -fx-border-width: 2; -fx-background-radius: 5;" visible="false" GridPane.columnSpan="4" GridPane.rowIndex="3" GridPane.rowSpan="6">
+                                <Button focusTraversable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="false" onAction="#showWritePanel" style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 20 px; -fx-padding: 10px 20px; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Write" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                                <VBox fx:id="composePanel" alignment="CENTER" prefHeight="400.0" spacing="5.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5; -fx-border-width: 1.5; -fx-background-radius: 5;" visible="false" GridPane.columnSpan="4" GridPane.rowIndex="3" GridPane.rowSpan="6">
                                     <children>
                                     <Label fx:id="labelErrorTo" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="true" style="-fx-background-color: blue;" textAlignment="CENTER" textFill="RED" visible="false" VBox.vgrow="ALWAYS">
                                        <font>
@@ -122,7 +122,7 @@
                                                 </TextField>
                                             </children>
                                        <VBox.margin>
-                                          <Insets />
+                                          <Insets left="5.0" right="5.0" />
                                        </VBox.margin>
                                         </HBox>
                                         <Separator prefWidth="200.0" VBox.vgrow="ALWAYS" />
@@ -143,6 +143,9 @@
                                                     </font>
                                                 </TextField>
                                             </children>
+                                       <VBox.margin>
+                                          <Insets left="5.0" right="5.0" />
+                                       </VBox.margin>
                                         </HBox>
                                         <Separator layoutX="10.0" layoutY="251.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
                                         <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="5.0" VBox.vgrow="ALWAYS">
@@ -154,14 +157,20 @@
                                                 </Label>
                                                 <TextArea fx:id="bodyTextArea" prefHeight="200.0" prefWidth="200.0" />
                                             </children>
+                                       <VBox.margin>
+                                          <Insets left="5.0" right="5.0" />
+                                       </VBox.margin>
                                         </VBox>
                                         <HBox alignment="CENTER" prefHeight="74.0" prefWidth="451.0" spacing="5.0">
                                            <children>
-                                                  <Button mnemonicParsing="false" onAction="#closePanelSendEmail" prefHeight="40.0" prefWidth="115.0" text="Dismiss" textAlignment="CENTER" />
-                                              <Button mnemonicParsing="false" onAction="#handlerSend" prefHeight="40.0" prefWidth="115.0" text="Send" textAlignment="CENTER" />
+                                                  <Button mnemonicParsing="false" onAction="#closePanelSendEmail" prefHeight="40.0" prefWidth="115.0" style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10px 20px; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Dismiss" textAlignment="CENTER" />
+                                              <Button mnemonicParsing="false" onAction="#handlerSend" prefHeight="40.0" prefWidth="115.0" style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10px 20px; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Send" textAlignment="CENTER" />
                                            </children>
                                         </HBox>
                                     </children>
+                                 <GridPane.margin>
+                                    <Insets />
+                                 </GridPane.margin>
                                 </VBox>
                            </children>
                         </GridPane>

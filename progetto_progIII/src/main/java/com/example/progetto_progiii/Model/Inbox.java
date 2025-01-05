@@ -19,11 +19,6 @@ public class Inbox {
         return inbox;
     }
 
-    public Inbox(String userMail) {
-        setUserMail(userMail);
-        this.inbox = FXCollections.observableArrayList();
-    }
-
     public int getPortClient() {
         return portClient;
     }
