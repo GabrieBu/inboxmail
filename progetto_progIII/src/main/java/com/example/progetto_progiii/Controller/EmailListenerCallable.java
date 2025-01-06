@@ -54,7 +54,7 @@ public class EmailListenerCallable implements Callable<Void> {
     private void processIncomingMessage(String message) {
         JsonObject jsonMessage = JsonParser.parseString(message).getAsJsonObject();
         String typeReq = jsonMessage.get("type").getAsString();
-        if(typeReq.equals("send") || typeReq.equals("reply") || typeReq.equals("reply_all")) {
+        if(typeReq.equals("send") || typeReq.equals("reply") || typeReq.equals("reply_all") || typeReq.equals("forward")) {
             Platform.runLater(() -> {
                 Inbox.Mail newMail = parseMessageToMail(jsonMessage);
                 if (newMail != null) {

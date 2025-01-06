@@ -212,6 +212,13 @@ public class ViewInboxController{
 
                 break;
             case "forward":
+                jsonObject.addProperty("type", "forward");
+                mailJsonObj.addProperty("from", this.inbox.getUserMail());
+                mailJsonObj.add("to", toArray);
+                mailJsonObj.addProperty("subject", subjectTextField.getText());
+                mailJsonObj.addProperty("body", bodyTextArea.getText());
+                mailJsonObj.addProperty("date", LocalDateTime.now().toString());
+                jsonObject.add("mail", mailJsonObj);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + STATE_FUNC);
@@ -392,13 +399,13 @@ public class ViewInboxController{
     }
 
     public void handlerForward(ActionEvent actionEvent) {
-        this.setSTATE_FUNC("send");
+        this.setSTATE_FUNC("forward");
         clearAndEnable();
         composePanel.setVisible(true);
         Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
         if (currentMail != null) {
-            bodyTextArea.setText(currentMail.getBody());
-            subjectTextField.setText(currentMail.getSubject());
+            bodyTextArea.setText("From: " + currentMail.getFrom() + "\n\n\n" + currentMail.getBody());
+            subjectTextField.setText("Fw: " + currentMail.getSubject());
             subjectTextField.setEditable(false);
             bodyTextArea.setEditable(false);
             toTextField.clear();
