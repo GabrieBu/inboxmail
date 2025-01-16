@@ -3,7 +3,6 @@ package com.example.progetto_progiii.Controller;
 import com.example.progetto_progiii.Model.Inbox;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -16,7 +15,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.WindowEvent;
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +24,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javafx.collections.FXCollections;
 
 public class ViewInboxController{
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
@@ -34,7 +31,7 @@ public class ViewInboxController{
 
     private Inbox inbox;
     private Future<?> listenerFuture;
-    private final ExecutorService listenerExecutor = Executors.newFixedThreadPool(2);
+    private final ExecutorService listenerExecutor = Executors.newFixedThreadPool(1);
     private String STATE_FUNC = "";
     @FXML
     private TextField toTextField;
@@ -85,24 +82,10 @@ public class ViewInboxController{
             throw new IllegalStateException("The inbox has already been initialized");
         }
         this.inbox = inbox;
-        try (ServerSocket serverSocket = new ServerSocket(0);) {
-            this.inbox.setPortClient(serverSocket.getLocalPort());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try (Socket socket = new Socket("localhost", 8189);) {
-            OutputStream outputStream = socket.getOutputStream();
-            PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
-            writer.println(pack(this.inbox.getUserMail(), this.inbox.getPortClient()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         textFieldUsermail.textProperty().bind(inbox.userMailProperty());
 
         ObservableList<Inbox.Mail> mailObservableList = inbox.getMails();
-        FXCollections.reverse(mailObservableList);
         listViewMails.setItems(mailObservableList);
 
 
@@ -140,17 +123,7 @@ public class ViewInboxController{
                 }
             }
         });
-
-        startListener();
-        ServerConnection(textFieldProva, statusCircle);
-    }
-
-    private String pack(String typedMail, int port){
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "handshake");
-        jsonObject.addProperty("typed_mail_user", typedMail);
-        jsonObject.addProperty("port", String.valueOf(port));
-        return jsonObject.toString();
+        serverConnection(textFieldProva, statusCircle);
     }
 
     private boolean validate(String email){
@@ -162,15 +135,6 @@ public class ViewInboxController{
         labelErrorTo.setVisible(false);
         labelErrorSubject.setVisible(false);
         String[] recipients = toTextField.getText().split(", ");
-        JsonArray toArray = new JsonArray();
-        for(String recipient : recipients){
-            if(!validate(recipient)) {
-                labelErrorTo.setVisible(true);
-                labelErrorTo.setText("Invalid email addresses within recipients");
-                return;
-            }
-            toArray.add(recipient);
-        }
 
         if(subjectTextField.getText().isEmpty()){
             labelErrorTo.setVisible(false);
@@ -178,54 +142,27 @@ public class ViewInboxController{
             labelErrorSubject.setText("Subject can not be empty");
             return;
         }
-        JsonObject jsonObject = new JsonObject();
-        JsonObject mailJsonObj = new JsonObject();
-        System.out.println("State function: " + STATE_FUNC);
 
+        JsonObject newMessage;
+        Inbox.Mail mail = new Inbox.Mail(this.inbox.getUserMail(), recipients, subjectTextField.getText(), bodyTextArea.getText(), LocalDateTime.now());
         switch(STATE_FUNC){
             case "send":
-                jsonObject.addProperty("type", "send");
-                mailJsonObj.addProperty("from", textFieldUsermail.textProperty().get());
-                mailJsonObj.add("to", toArray);
-                mailJsonObj.addProperty("subject", subjectTextField.textProperty().get());
-                mailJsonObj.addProperty("body", bodyTextArea.getText());
-                mailJsonObj.addProperty("date", LocalDateTime.now().toString());
-                jsonObject.add("mail", mailJsonObj);
+                newMessage = createJson(mail, recipients, "send");
                 break;
             case "reply":
-                jsonObject.addProperty("type", "reply");
-                mailJsonObj.addProperty("from", this.inbox.getUserMail());
-                mailJsonObj.add("to", toArray);
-                mailJsonObj.addProperty("subject", subjectTextField.getText());
-                mailJsonObj.addProperty("body", bodyTextArea.getText());
-                mailJsonObj.addProperty("date", LocalDateTime.now().toString());
-                jsonObject.add("mail", mailJsonObj);
+                newMessage = createJson(mail, recipients, "reply");
                 break;
             case "reply_all":
-                jsonObject.addProperty("type", "reply_all");
-                mailJsonObj.addProperty("from", this.inbox.getUserMail());
-                mailJsonObj.add("to", toArray);
-                mailJsonObj.addProperty("subject", subjectTextField.getText());
-                mailJsonObj.addProperty("body", bodyTextArea.getText());
-                mailJsonObj.addProperty("date", LocalDateTime.now().toString());
-                jsonObject.add("mail", mailJsonObj);
-
+                newMessage = createJson(mail, recipients, "reply_all");
                 break;
             case "forward":
-                jsonObject.addProperty("type", "forward");
-                mailJsonObj.addProperty("from", this.inbox.getUserMail());
-                mailJsonObj.add("to", toArray);
-                mailJsonObj.addProperty("subject", subjectTextField.getText());
-                mailJsonObj.addProperty("body", bodyTextArea.getText());
-                mailJsonObj.addProperty("date", LocalDateTime.now().toString());
-                jsonObject.add("mail", mailJsonObj);
+                newMessage = createJson(mail, recipients, "forward");
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + STATE_FUNC);
         }
 
-        writeOnSocket(jsonObject);
-
+        writeOnSocket(newMessage);
         toTextField.clear();
         subjectTextField.clear();
         bodyTextArea.clear();
@@ -233,6 +170,30 @@ public class ViewInboxController{
         labelErrorSubject.setVisible(false);
         composePanel.setVisible(false);
     }
+
+    public JsonObject createJson(Inbox.Mail mail, String[] recipients, String type){
+        JsonArray toArray = new JsonArray();
+        for(String recipient : recipients){
+            if(!validate(recipient)) {
+                labelErrorTo.setVisible(true);
+                labelErrorTo.setText("Invalid email addresses within recipients");
+                return null;
+            }
+            toArray.add(recipient);
+        }
+
+        JsonObject jsonObject = new JsonObject();
+        JsonObject mailJsonObj = new JsonObject();
+        jsonObject.addProperty("type", type);
+        mailJsonObj.addProperty("from", mail.getFrom());
+        mailJsonObj.add("to", toArray);
+        mailJsonObj.addProperty("subject", mail.getSubject());
+        mailJsonObj.addProperty("body", mail.getBody());
+        mailJsonObj.addProperty("date", mail.getDate().toString());
+        jsonObject.add("mail", mailJsonObj);
+        return jsonObject;
+    }
+
 
     public void showWritePanel(ActionEvent actionEvent) {
         this.setSTATE_FUNC("send");
@@ -266,10 +227,8 @@ public class ViewInboxController{
 
     @FXML
     public void shutdown(WindowEvent event) {
-        //inviare un messaggio al server per far cancellare il valore dalla hashmap
         try {
-            stopListener();      // Ferma thread del listener
-            stopServerCheckConnection(); // Chiude eventuali connessioni aperte al server
+            stopConnection();      // Ferma thread del listener
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -279,7 +238,7 @@ public class ViewInboxController{
         }
     }
 
-    public void stopListener() {
+    public void stopConnection() {
         if (listenerFuture != null && !listenerFuture.isDone()) {
             listenerFuture.cancel(true); // interrupt the listener thread
         }
@@ -292,26 +251,25 @@ public class ViewInboxController{
             listenerExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
+
+        try(Socket socket = new Socket("localhost", 8189)) {
+            OutputStream outputStream = socket.getOutputStream();
+            PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("type", "disconnect");
+            jsonObject.addProperty("user", this.inbox.getUserMail());
+            writer.println(jsonObject);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void startListener() {
+    public void serverConnection(TextField textFieldProva, Circle statusCircle) {
         if (this.inbox == null) {
             throw new IllegalStateException("Inbox must be initialized before starting the listener.");
         }
-        if (this.inbox.getPortClient() <= 0) {
-            throw new IllegalStateException("Invalid portClient value. Listener cannot start.");
-        }
-
-        EmailListenerCallable emailListener = new EmailListenerCallable(inbox);
-        listenerFuture = listenerExecutor.submit(emailListener);
-    }
-
-    public void ServerConnection(TextField textFieldProva, Circle statusCircle) {
-        if (this.inbox == null) {
-            throw new IllegalStateException("Inbox must be initialized before starting the listener.");
-        }
-
-        ServerCheckerCallable ServerChecker= new ServerCheckerCallable(8189, textFieldProva, statusCircle);
+        ServerCheckerCallable ServerChecker= new ServerCheckerCallable(textFieldProva, statusCircle, inbox);
         listenerFuture=listenerExecutor.submit(ServerChecker);
     }
 
@@ -331,8 +289,6 @@ public class ViewInboxController{
             subjectTextField.setText("Re:" + currentMail.getSubject());
             subjectTextField.setEditable(false);
         }
-        //reply
-        //bodyTextArea.setText(currentMail.getFrom()+": "+ currentMail.getBody()+"\n\n\n");
         bodyTextArea.setText(currentMail.getBody()+"\n\n\n");
 
     }
@@ -366,7 +322,7 @@ public class ViewInboxController{
         Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
         if(currentMail != null) {
             this.setSTATE_FUNC("reply_all");
-            List<String> recipients = currentMail.getTo();
+            String[] recipients = currentMail.getTo();
             StringBuilder recipientListBuilder = new StringBuilder();
             for (String recipient : recipients) {
                 if (!recipient.equals(this.inbox.getUserMail())) {

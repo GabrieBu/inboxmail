@@ -12,14 +12,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-
 import java.io.*;
 import java.net.*;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,8 +56,6 @@ public class ViewAuthController{
         jsonObject.addProperty("type", "authentication");
         jsonObject.addProperty("typed_mail_user", typedMail);
         jsonObject.addProperty("port", port);
-
-        System.out.println(jsonObject);
         return jsonObject.toString();
     }
 
@@ -70,7 +64,6 @@ public class ViewAuthController{
         if (validate(typedMail)) {
             inbox.setUserMail(typedMail);
             try ( ServerSocket serverSocket = new ServerSocket(0);) {
-
                 int portClient = serverSocket.getLocalPort();
                 Socket socket = new Socket("localhost", 8189);
 
@@ -86,36 +79,13 @@ public class ViewAuthController{
                 incomingAuth.close();
 
                 if (responseLine == null) {
-                    System.err.println("Error: No response from server.");
                     labelError.setVisible(true);
-                    labelError.setText("Server error. Please try again later.");
+                    labelError.setText("Server is not responding. Please try again later.");
                     return;
                 }
 
                 JsonObject response = JsonParser.parseString(responseLine).getAsJsonObject();
                 if (response.get("authenticated").getAsBoolean()) {
-                    JsonElement inboxElement = response.get("inbox");
-                    if (inboxElement.isJsonPrimitive() && inboxElement.getAsJsonPrimitive().isString()) {
-                        String inboxJsonString = inboxElement.getAsString();
-                        JsonArray inboxArray = JsonParser.parseString(inboxJsonString).getAsJsonArray();
-                        for (JsonElement emailElement : inboxArray) {
-                            JsonObject email = emailElement.getAsJsonObject();
-                            List<String> listTo = new LinkedList<>();
-                            email.get("to").getAsJsonArray().forEach(to -> listTo.add(to.getAsString()));
-                            LocalDateTime date = LocalDateTime.parse(email.get("date").getAsString());
-
-                            Inbox.Mail mail = new Inbox.Mail(
-                                    email.get("from").getAsString(),
-                                    listTo,
-                                    email.get("subject").getAsString(),
-                                    email.get("body").getAsString(),
-                                    date
-                            );
-                            this.inbox.getMails().add(mail);
-                        }
-                    }
-
-                    // initialize the other view
                     viewInboxController.initModel(inbox);
                     stage.setScene(sceneInbox);
                     stage.setMinHeight(730);
