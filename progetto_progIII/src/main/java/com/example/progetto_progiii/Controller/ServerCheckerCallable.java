@@ -41,6 +41,7 @@ public class ServerCheckerCallable implements Callable<Void> {
 
     public Void call() {
         while (running) {
+            System.out.println("Before last id mail: " + this.inbox.getIdLastMail());
             try (Socket socket = new Socket("localhost", port);
                  OutputStream outputStream = socket.getOutputStream();
                  ServerSocket clientSock = new ServerSocket(socket.getLocalPort())) {
@@ -50,6 +51,8 @@ public class ServerCheckerCallable implements Callable<Void> {
                 jsonObject.addProperty("type", "request");
                 jsonObject.addProperty("user", this.inbox.getUserMail());
                 jsonObject.addProperty("port", clientSock.getLocalPort());
+                jsonObject.addProperty("last_id_received", this.inbox.getIdLastMail());
+
                 writer.println(jsonObject);
 
                 try (Socket sockIn = clientSock.accept()){
@@ -75,7 +78,7 @@ public class ServerCheckerCallable implements Callable<Void> {
             }
             //forse si può fare unico switch
             try {
-                Thread.sleep(20000); //ogni 20 sec
+                Thread.sleep(10000); //ogni 20 sec
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 System.out.println("Thread interrotto: " + e.getMessage());
@@ -88,12 +91,18 @@ public class ServerCheckerCallable implements Callable<Void> {
 
     private void handleServerResponse(JsonObject jsonResponse) {
         JsonArray jsonArray = jsonResponse.get("inbox").getAsJsonArray();
-        for(JsonElement jsonElement : jsonArray){
-            JsonObject jsonObject = jsonElement.getAsJsonObject();
-            processIncomingMessage(jsonObject);
+        if(!jsonArray.isEmpty()) {
+            long new_max = Long.MIN_VALUE;
+            for (JsonElement jsonElement : jsonArray) {
+                JsonObject jsonObject = jsonElement.getAsJsonObject();
+                processIncomingMessage(jsonObject);
+                if(jsonObject.get("id").getAsLong() > new_max)
+                    new_max = jsonObject.get("id").getAsLong();
+            }
+            this.inbox.setIdLastMail(new_max);
+            System.out.println("After last id mail: " + this.inbox.getIdLastMail());
         }
     }
-
 
     private void processIncomingMessage(JsonObject jsonMessage) {
         Platform.runLater(() -> {
@@ -115,6 +124,7 @@ public class ServerCheckerCallable implements Callable<Void> {
             LocalDateTime date = LocalDateTime.parse(mail.get("date").getAsString());
 
             return new Inbox.Mail(
+                    mail.get("id").getAsLong(),
                     mail.get("from").getAsString(),
                     arrayTo,
                     mail.get("subject").getAsString(),

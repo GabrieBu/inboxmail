@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Inbox {
+    private long idLastMail;
     private final StringProperty userMail = new SimpleStringProperty();
     private final ObservableList<Mail> inbox;
 
@@ -17,6 +18,15 @@ public class Inbox {
 
     public Inbox() {
         this.inbox = FXCollections.observableArrayList();
+        idLastMail =  Long.MIN_VALUE;
+    }
+
+    public long getIdLastMail() {
+        return idLastMail;
+    }
+
+    public void setIdLastMail(long idLastMail) {
+        this.idLastMail = idLastMail;
     }
 
     public StringProperty userMailProperty() {return userMail;}
@@ -28,6 +38,7 @@ public class Inbox {
 
 
     public static class Mail{
+        private long id;
         private String from;
         private String[] to;
         private String subject;
@@ -40,6 +51,19 @@ public class Inbox {
             this.subject = subject;
             this.body = body;
             this.date_time = dateTime;
+        }
+
+        public Mail(long id, String from, String[] to, String subject, String body, LocalDateTime dateTime) {
+            this.id = id;
+            this.from = from;
+            this.to = to; //to_check
+            this.subject = subject;
+            this.body = body;
+            this.date_time = dateTime;
+        }
+
+        public long getId(){
+            return id;
         }
 
         public String getFrom() {

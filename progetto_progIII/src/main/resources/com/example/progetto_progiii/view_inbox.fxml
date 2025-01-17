@@ -104,7 +104,7 @@
                                 <Button focusTraversable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="false" onAction="#showWritePanel" style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 20 px; -fx-padding: 10px 20px; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Write" GridPane.columnIndex="3" GridPane.rowIndex="7" />
                                 <VBox fx:id="composePanel" alignment="CENTER" prefHeight="400.0" spacing="5.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5; -fx-border-width: 1.5; -fx-background-radius: 5;" visible="false" GridPane.columnSpan="4" GridPane.rowIndex="3" GridPane.rowSpan="6">
                                     <children>
-                                    <Label fx:id="labelErrorTo" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="true" style="-fx-background-color: blue;" textAlignment="CENTER" textFill="RED" visible="false" VBox.vgrow="ALWAYS">
+                                    <Label fx:id="labelErrorTo" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="true" textAlignment="CENTER" textFill="RED" visible="false" VBox.vgrow="ALWAYS">
                                        <font>
                                           <Font size="16.0" />
                                        </font></Label>

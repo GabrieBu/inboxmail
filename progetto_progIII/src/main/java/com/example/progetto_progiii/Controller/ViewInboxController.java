@@ -3,6 +3,7 @@ package com.example.progetto_progiii.Controller;
 import com.example.progetto_progiii.Model.Inbox;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -15,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.WindowEvent;
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -110,7 +112,6 @@ public class ViewInboxController{
             }
         });
 
-
         listViewMails.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Inbox.Mail>() {
             @Override
             public void changed(ObservableValue<? extends Inbox.Mail> observableValue, Inbox.Mail inbox, Inbox.Mail t1) {
@@ -143,55 +144,50 @@ public class ViewInboxController{
             return;
         }
 
-        JsonObject newMessage;
-        Inbox.Mail mail = new Inbox.Mail(this.inbox.getUserMail(), recipients, subjectTextField.getText(), bodyTextArea.getText(), LocalDateTime.now());
-        switch(STATE_FUNC){
-            case "send":
-                newMessage = createJson(mail, recipients, "send");
-                break;
-            case "reply":
-                newMessage = createJson(mail, recipients, "reply");
-                break;
-            case "reply_all":
-                newMessage = createJson(mail, recipients, "reply_all");
-                break;
-            case "forward":
-                newMessage = createJson(mail, recipients, "forward");
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + STATE_FUNC);
-        }
 
-        writeOnSocket(newMessage);
-        toTextField.clear();
-        subjectTextField.clear();
-        bodyTextArea.clear();
-        labelErrorTo.setVisible(false);
-        labelErrorSubject.setVisible(false);
-        composePanel.setVisible(false);
+        Inbox.Mail mail = new Inbox.Mail(this.inbox.getUserMail(), recipients, subjectTextField.getText(), bodyTextArea.getText(), LocalDateTime.now());
+        JsonObject newMessage;
+        newMessage = switch (STATE_FUNC) {
+            case "send" -> createJson(mail, recipients, "send");
+            case "reply" -> createJson(mail, recipients, "reply");
+            case "reply_all" -> createJson(mail, recipients, "reply_all");
+            case "forward" -> createJson(mail, recipients, "forward");
+            default -> throw new IllegalStateException("Unexpected value: " + STATE_FUNC);
+        };
+
+        if(newMessage != null){ //newMessage == null if no valid recipients found
+            writeOnSocket(newMessage);
+        }
     }
 
     public JsonObject createJson(Inbox.Mail mail, String[] recipients, String type){
-        JsonArray toArray = new JsonArray();
+        JsonArray toValidArray = new JsonArray(); //valid recipients
+        StringBuilder invalidRecipients = new StringBuilder();
         for(String recipient : recipients){
             if(!validate(recipient)) {
-                labelErrorTo.setVisible(true);
-                labelErrorTo.setText("Invalid email addresses within recipients");
-                return null;
+                invalidRecipients.append(recipient).append(" ");
             }
-            toArray.add(recipient);
+            else {
+                toValidArray.add(recipient);
+            }
         }
 
-        JsonObject jsonObject = new JsonObject();
-        JsonObject mailJsonObj = new JsonObject();
-        jsonObject.addProperty("type", type);
-        mailJsonObj.addProperty("from", mail.getFrom());
-        mailJsonObj.add("to", toArray);
-        mailJsonObj.addProperty("subject", mail.getSubject());
-        mailJsonObj.addProperty("body", mail.getBody());
-        mailJsonObj.addProperty("date", mail.getDate().toString());
-        jsonObject.add("mail", mailJsonObj);
-        return jsonObject;
+        labelErrorTo.setVisible(true);
+        labelErrorTo.setText("Invalid email addresses: " + invalidRecipients);
+
+        if(!toValidArray.isEmpty()) {
+            JsonObject jsonObject = new JsonObject();
+            JsonObject mailJsonObj = new JsonObject();
+            jsonObject.addProperty("type", type);
+            mailJsonObj.addProperty("from", mail.getFrom());
+            mailJsonObj.add("to", toValidArray);
+            mailJsonObj.addProperty("subject", mail.getSubject());
+            mailJsonObj.addProperty("body", mail.getBody());
+            mailJsonObj.addProperty("date", mail.getDate().toString());
+            jsonObject.add("mail", mailJsonObj);
+            return jsonObject;
+        }
+        return null;
     }
 
 
@@ -273,10 +269,6 @@ public class ViewInboxController{
         listenerFuture=listenerExecutor.submit(ServerChecker);
     }
 
-    public void stopServerCheckConnection() {
-
-    }
-
     public void handlerReply(ActionEvent actionEvent) {
         clearAndEnable();
         composePanel.setVisible(true);
@@ -293,13 +285,19 @@ public class ViewInboxController{
 
     }
 
-    private static void writeOnSocket(JsonObject jsonObject){
-        try{
-            Socket socket = new Socket("localhost", 8189);
+    private void writeOnSocket(JsonObject jsonObject){
+        try(Socket socket = new Socket("localhost", 8189);
+            ServerSocket serverSocket = new ServerSocket(0);) {
+            jsonObject.addProperty("port", serverSocket.getLocalPort()); //we will wait feedback trough this port
             OutputStream outputStream = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
             writer.println(jsonObject);
-            socket.close();
+            Socket responseSocket = serverSocket.accept(); //wait for response from Server if error or success
+            BufferedReader reader = new BufferedReader(new InputStreamReader(responseSocket.getInputStream()));
+            String response = reader.readLine();
+            JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
+            labelErrorTo.setVisible(true);
+            labelErrorTo.setText("Could not be possible sending email to " + jsonResponse.get("to").getAsString());
         }
         catch (IOException e){
             e.printStackTrace();

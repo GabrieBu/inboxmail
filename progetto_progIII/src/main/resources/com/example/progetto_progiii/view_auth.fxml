@@ -5,27 +5,40 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox alignment="CENTER" prefHeight="134.0" prefWidth="375.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.progetto_progiii.Controller.ViewAuthController">
+<VBox alignment="CENTER" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.progetto_progiii.Controller.ViewAuthController">
     <children>
-        <Label fx:id="labelError" alignment="CENTER" contentDisplay="CENTER" layoutX="126" layoutY="120" minHeight="16" minWidth="150" text="aaaaa" textAlignment="CENTER" textFill="RED" wrapText="true">
-         <font>
-            <Font size="18.0" />
-         </font>
+      <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="146.0" minWidth="10.0" prefWidth="117.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="257.0" minWidth="10.0" prefWidth="228.0" />
+            <ColumnConstraints />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Button mnemonicParsing="false" onAction="#handlerOpenInbox" style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 16px; fx-padding: 10px 20px; -fx-border-color: #cccccc; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Open Inbox" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+              <Label fx:id="labelError" alignment="CENTER_RIGHT" contentDisplay="RIGHT" text="aaaaa" textAlignment="CENTER" textFill="RED" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER">
+               <font>
+                  <Font size="18.0" />
+               </font>
+              </Label>
+              <TextField fx:id="textboxEmail" promptText="Enter your email" GridPane.columnSpan="2" GridPane.rowIndex="1">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </TextField>
+            <Label text="Welcome!" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+         </children>
          <VBox.margin>
-            <Insets />
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
          </VBox.margin>
-        </Label>
-        <TextField fx:id="textboxEmail" prefWidth="300.0" promptText="Enter your email">
-         <font>
-            <Font size="16.0" />
-         </font></TextField>
-      <Button mnemonicParsing="false" onAction="#handlerOpenInbox" style="-fx-background-color: #f0f0f0; -fx-text-fill: #333333; -fx-font-size: 16px; fx-padding: 10px 20px; -fx-border-color: #cccccc; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Open Inbox">
-         <VBox.margin>
-            <Insets top="20.0" />
-         </VBox.margin>
-      </Button>
+      </GridPane>
     </children>
-   <padding>
-      <Insets left="20.0" right="20.0" />
-   </padding>
 </VBox>
