@@ -39,15 +39,15 @@ public class Inbox {
 
     public static class Mail{
         private long id;
-        private String from;
-        private String[] to;
-        private String subject;
-        private String body;
+        private final String from;
+        private final String[] to;
+        private final String subject;
+        private final String body;
         private final LocalDateTime date_time;
 
         public Mail(String from, String[] to, String subject, String body, LocalDateTime dateTime) {
             this.from = from;
-            this.to = to; //to_check
+            this.to = to;
             this.subject = subject;
             this.body = body;
             this.date_time = dateTime;
@@ -89,22 +89,6 @@ public class Inbox {
         public String getDateFormatted() {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             return date_time.format(formatter);
-        }
-
-        public void setFrom(String from) {
-            this.from = from;
-        }
-
-        public void setTo(String[] to) {
-            this.to = to; //to_check
-        }
-
-        public void setSubject(String subject) {
-            this.subject = subject;
-        }
-
-        public void setBody(String body) {
-            this.body = body;
         }
     } //TO CHECK WHETHER PUBLIC IS CORRECT
 }

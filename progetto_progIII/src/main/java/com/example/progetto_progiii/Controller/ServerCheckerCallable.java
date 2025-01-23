@@ -34,14 +34,12 @@ public class ServerCheckerCallable implements Callable<Void> {
         connectionState.addListener((observable, oldValue, newValue) -> {
             statusCircle.setFill(newValue ? Color.GREEN : Color.RED);
         });
-
         // initial fill color
         statusCircle.setFill(Color.RED);
     }
 
     public Void call() {
         while (running) {
-            System.out.println("Before last id mail: " + this.inbox.getIdLastMail());
             try (Socket socket = new Socket("localhost", port);
                  OutputStream outputStream = socket.getOutputStream();
                  ServerSocket clientSock = new ServerSocket(socket.getLocalPort())) {

@@ -107,7 +107,10 @@
                                     <Label fx:id="labelErrorTo" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="true" textAlignment="CENTER" textFill="RED" visible="false" VBox.vgrow="ALWAYS">
                                        <font>
                                           <Font size="16.0" />
-                                       </font></Label>
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets left="8.0" top="8.0" />
+                                       </VBox.margin></Label>
                                         <HBox alignment="CENTER_LEFT" prefHeight="74.0" prefWidth="451.0" VBox.vgrow="ALWAYS">
                                             <children>
                                                 <Label text="To: " HBox.hgrow="ALWAYS">
@@ -129,7 +132,10 @@
                                         <Label fx:id="labelErrorSubject" focusTraversable="false" layoutX="21.0" layoutY="21.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mouseTransparent="true" textAlignment="CENTER" textFill="RED" visible="false">
                                        <font>
                                           <Font size="16.0" />
-                                       </font></Label>
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets left="8.0" top="8.0" />
+                                       </VBox.margin></Label>
                                         <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" prefHeight="37.0" prefWidth="452.0" spacing="5.0" VBox.vgrow="ALWAYS">
                                             <children>
                                                 <Label text="Subject:  " HBox.hgrow="ALWAYS">
