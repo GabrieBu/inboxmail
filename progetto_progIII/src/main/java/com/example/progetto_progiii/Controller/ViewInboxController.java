@@ -27,6 +27,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javafx.collections.FXCollections;
+
 
 public class ViewInboxController{
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
@@ -89,6 +91,7 @@ public class ViewInboxController{
         textFieldUsermail.textProperty().bind(inbox.userMailProperty());
 
         ObservableList<Inbox.Mail> mailObservableList = inbox.getMails();
+        FXCollections.reverse(mailObservableList);
         listViewMails.setItems(mailObservableList);
 
 
@@ -197,6 +200,10 @@ public class ViewInboxController{
 
     public void deleteMail(ActionEvent actionEvent) {
         int indexToRemove = listViewMails.getSelectionModel().getSelectedIndex();
+        displayTo.setText("");
+        displayBody.setText("");
+        displayDate.setText("");
+        displayFrom.setText("");
         inbox.getMails().remove(indexToRemove);
         try {
             Socket socket = new Socket("localhost", 8189);
