@@ -16,9 +16,8 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.concurrent.Callable;
 
-public class ServerCheckerCallable implements Callable<Void> {
+public class ServerCheckerCallable implements Runnable {
     private volatile boolean running = true;
     private final int port = 8189;
     private final BooleanProperty connectionState = new SimpleBooleanProperty();
@@ -38,7 +37,7 @@ public class ServerCheckerCallable implements Callable<Void> {
         statusCircle.setFill(Color.RED);
     }
 
-    public Void call() {
+    public void run() {
         while (running) {
             try (Socket socket = new Socket("localhost", port);
                  OutputStream outputStream = socket.getOutputStream();
@@ -52,12 +51,9 @@ public class ServerCheckerCallable implements Callable<Void> {
                 jsonObject.addProperty("last_id_received", this.inbox.getIdLastMail());
 
                 writer.println(jsonObject);
-
                 try (Socket sockIn = clientSock.accept()){
                     BufferedReader reader = new BufferedReader(new InputStreamReader(sockIn.getInputStream()));
-
                     String response = reader.readLine();
-                    System.out.println("Server Response: " + response);
                     if (response != null) {
                         updateServerConnection(true);
                         JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
@@ -84,7 +80,6 @@ public class ServerCheckerCallable implements Callable<Void> {
                 break;
             }
         }
-        return null;
     }
 
     private void handleServerResponse(JsonObject jsonResponse) {
@@ -98,7 +93,6 @@ public class ServerCheckerCallable implements Callable<Void> {
                     new_max = jsonObject.get("id").getAsLong();
             }
             this.inbox.setIdLastMail(new_max);
-            System.out.println("After last id mail: " + this.inbox.getIdLastMail());
         }
     }
 

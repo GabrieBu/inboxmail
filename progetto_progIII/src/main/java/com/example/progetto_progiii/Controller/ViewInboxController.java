@@ -89,11 +89,9 @@ public class ViewInboxController{
         this.inbox = inbox;
 
         textFieldUsermail.textProperty().bind(inbox.userMailProperty());
-
         ObservableList<Inbox.Mail> mailObservableList = inbox.getMails();
         FXCollections.reverse(mailObservableList);
         listViewMails.setItems(mailObservableList);
-
 
         listViewMails.setCellFactory(param -> new ListCell<>() {
             @Override
@@ -131,7 +129,7 @@ public class ViewInboxController{
         serverConnection(textFieldProva, statusCircle);
     }
 
-    private boolean validate(String email){
+    private static boolean validate(String email){
         Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
         return matcher.matches();
     }
@@ -181,12 +179,10 @@ public class ViewInboxController{
             mailJsonObj.addProperty("body", mail.getBody());
             mailJsonObj.addProperty("date", mail.getDate().toString());
             jsonObject.add("mail", mailJsonObj);
-            System.out.println("jsonobj " + jsonObject);
             return jsonObject;
         }
         return null;
     }
-
 
     public void showWritePanel(ActionEvent actionEvent) {
         this.setSTATE_FUNC("send");
@@ -205,6 +201,9 @@ public class ViewInboxController{
         displayDate.setText("");
         displayFrom.setText("");
         inbox.getMails().remove(indexToRemove);
+        if(inbox.getMails().isEmpty()){
+            inbox.setIdLastMail(Long.MIN_VALUE);
+        }
         try {
             Socket socket = new Socket("localhost", 8189);
             OutputStream outputStream = socket.getOutputStream();
@@ -235,9 +234,6 @@ public class ViewInboxController{
     }
 
     public void stopConnection() {
-        if (listenerFuture != null && !listenerFuture.isDone()) {
-            listenerFuture.cancel(true); // interrupt the listener thread
-        }
         listenerExecutor.shutdown();
         try {
             if (!listenerExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
@@ -266,7 +262,7 @@ public class ViewInboxController{
             throw new IllegalStateException("Inbox must be initialized before starting the listener.");
         }
         ServerCheckerCallable ServerChecker= new ServerCheckerCallable(textFieldProva, statusCircle, inbox);
-        listenerFuture=listenerExecutor.submit(ServerChecker);
+        listenerExecutor.execute(ServerChecker);
     }
 
     public void handlerReply(ActionEvent actionEvent) {
@@ -347,20 +343,6 @@ public class ViewInboxController{
         }
         bodyTextArea.setText(currentMail.getBody()+"\n\n\n ");
 
-    }
-
-    public JsonArray convertToJsonArray(List<String> toList, String currentUserMail) {
-        JsonArray jsonArray = new JsonArray();
-
-        if (toList != null) {
-            for (String str : toList) {
-                System.out.println(str + "added!");
-                if (!currentUserMail.equals(str)) {
-                    jsonArray.add(str);
-                }
-            }
-        }
-        return jsonArray;
     }
 
     public void handlerForward(ActionEvent actionEvent) {
