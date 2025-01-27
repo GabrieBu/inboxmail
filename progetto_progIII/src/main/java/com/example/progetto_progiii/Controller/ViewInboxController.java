@@ -7,7 +7,6 @@ import com.google.gson.JsonParser;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -19,15 +18,11 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javafx.collections.FXCollections;
 
 
 public class ViewInboxController{
@@ -35,8 +30,7 @@ public class ViewInboxController{
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     private Inbox inbox;
-    private Future<?> listenerFuture;
-    private final ExecutorService listenerExecutor = Executors.newFixedThreadPool(1);
+    private final ExecutorService exec = Executors.newFixedThreadPool(1);
     private String STATE_FUNC = "";
     @FXML
     private TextField toTextField;
@@ -80,6 +74,8 @@ public class ViewInboxController{
     @FXML
     private Circle statusCircle;
 
+    @FXML
+    private Label labelShowError;
 
     @FXML
     public void initModel(Inbox inbox) {
@@ -89,9 +85,7 @@ public class ViewInboxController{
         this.inbox = inbox;
 
         textFieldUsermail.textProperty().bind(inbox.userMailProperty());
-        ObservableList<Inbox.Mail> mailObservableList = inbox.getMails();
-        FXCollections.reverse(mailObservableList);
-        listViewMails.setItems(mailObservableList);
+        listViewMails.setItems(this.inbox.getMails());
 
         listViewMails.setCellFactory(param -> new ListCell<>() {
             @Override
@@ -114,6 +108,7 @@ public class ViewInboxController{
             }
         });
 
+        //binding item listview for textbox displaying mail information
         listViewMails.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Inbox.Mail>() {
             @Override
             public void changed(ObservableValue<? extends Inbox.Mail> observableValue, Inbox.Mail inbox, Inbox.Mail t1) {
@@ -126,7 +121,7 @@ public class ViewInboxController{
                 }
             }
         });
-        serverConnection(textFieldProva, statusCircle);
+        serverConnection(textFieldProva, statusCircle, labelShowError);
     }
 
     private static boolean validate(String email){
@@ -146,7 +141,7 @@ public class ViewInboxController{
         }
 
         Inbox.Mail mail = new Inbox.Mail(this.inbox.getUserMail(), recipients, subjectTextField.getText(), bodyTextArea.getText(), LocalDateTime.now());
-        JsonObject newMessage = createJson(mail, recipients, STATE_FUNC);
+        JsonObject newMessage = createJson(mail, recipients, STATE_FUNC); //STATE_FUNC is changed if Reply, Reply All or Send buttons are clicked
 
         if(newMessage != null){ //newMessage == null if no valid recipients found
             writeOnSocket(newMessage);
@@ -163,13 +158,12 @@ public class ViewInboxController{
                 toValidatedArray.add(recipient);
         }
 
-        if(!invalidRecipients.isEmpty()){
+        if(!invalidRecipients.isEmpty()){ //there is at least one invalid recipient
             labelErrorTo.setVisible(true);
             labelErrorTo.setText("Invalid email addresses: " + invalidRecipients);
             return null;
         }
-
-        if(!toValidatedArray.isEmpty()) {
+        if(!toValidatedArray.isEmpty()) { //there is at least one valid recipient
             JsonObject jsonObject = new JsonObject();
             JsonObject mailJsonObj = new JsonObject();
             jsonObject.addProperty("type", type);
@@ -186,7 +180,7 @@ public class ViewInboxController{
 
     public void showWritePanel(ActionEvent actionEvent) {
         this.setSTATE_FUNC("send");
-        clearAndEnable();
+        clearAndEnable(); //function to clear all textboxes
         composePanel.setVisible(true);
     }
 
@@ -234,13 +228,13 @@ public class ViewInboxController{
     }
 
     public void stopConnection() {
-        listenerExecutor.shutdown();
+        exec.shutdown();
         try {
-            if (!listenerExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                listenerExecutor.shutdownNow();
+            if (!exec.awaitTermination(5, TimeUnit.SECONDS)) {
+                exec.shutdownNow();
             }
         } catch (InterruptedException e) {
-            listenerExecutor.shutdownNow();
+            exec.shutdownNow();
             Thread.currentThread().interrupt();
         }
 
@@ -253,31 +247,31 @@ public class ViewInboxController{
             writer.println(jsonObject);
         }
         catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Server is not responding");
         }
     }
 
-    public void serverConnection(TextField textFieldProva, Circle statusCircle) {
+    public void serverConnection(TextField textFieldProva, Circle statusCircle, Label labelShowError) {
         if (this.inbox == null) {
             throw new IllegalStateException("Inbox must be initialized before starting the listener.");
         }
-        ServerCheckerCallable ServerChecker= new ServerCheckerCallable(textFieldProva, statusCircle, inbox);
-        listenerExecutor.execute(ServerChecker);
+        RequestUpdateTask updateTask = new RequestUpdateTask(textFieldProva, statusCircle, labelShowError, inbox);
+        exec.execute(updateTask);
     }
 
     public void handlerReply(ActionEvent actionEvent) {
-        clearAndEnable();
-        composePanel.setVisible(true);
         Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
 
-        if(currentMail != null) {
+        if(currentMail != null) { //if mail is selected
+            clearAndEnable(); //function to clear all textboxes
+            composePanel.setVisible(true);
             this.setSTATE_FUNC("reply");
             toTextField.setText(currentMail.getFrom());
             toTextField.setEditable(false);
             subjectTextField.setText("Re:" + currentMail.getSubject());
             subjectTextField.setEditable(false);
+            bodyTextArea.setText(currentMail.getBody()+"\n\n\n");
         }
-        bodyTextArea.setText(currentMail.getBody()+"\n\n\n");
     }
 
     private void writeOnSocket(JsonObject jsonObject) {
@@ -295,19 +289,28 @@ public class ViewInboxController{
                      BufferedReader reader = new BufferedReader(new InputStreamReader(responseSocket.getInputStream()))) {
                     String response = reader.readLine();
                     JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
-                    if(!jsonResponse.get("type").getAsString().equals("send_ok")){
+
+                    if(!jsonResponse.get("type").getAsString().equals("send_ok")){ //if received feedback, but invalid recipients
                         JsonArray invalidRecipients = jsonResponse.getAsJsonArray("invalid_recipients");
                         labelErrorTo.setVisible(true);
-                        labelErrorTo.setText("Email addresses do not exist: " + invalidRecipients.toString() + ". Email not be sent to those addresess" );
+                        labelErrorTo.setText("Email addresses do not exist: " + invalidRecipients.toString());
                     }
                     else{
                         composePanel.setVisible(false); //email sent to all of them
                     }
                 }
+                catch(IOException e){
+                    labelErrorTo.setVisible(true);
+                    labelErrorTo.setText("Server is not responding. Try again later..." );
+                }
+            }
+            catch(IOException e) {
+                labelErrorTo.setVisible(true);
+                labelErrorTo.setText("Server is not responding. Try again later..." );
             }
         } catch (IOException e) {
             labelErrorTo.setVisible(true);
-            labelErrorTo.setText("Server is not up so it won't handle your mail. Try again later" );
+            labelErrorTo.setText("Try to restart application. Coulnd't be possible to open a socket" );
         }
     }
 
@@ -321,16 +324,16 @@ public class ViewInboxController{
     }
 
     public void handlerReplyAll(ActionEvent actionEvent) {
-        clearAndEnable();
-        composePanel.setVisible(true);
-
         Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
-        if(currentMail != null) {
+
+        if(currentMail != null) { //if mail is selected
+            clearAndEnable();
+            composePanel.setVisible(true);
             this.setSTATE_FUNC("reply_all");
             String[] recipients = currentMail.getTo();
             StringBuilder recipientListBuilder = new StringBuilder();
             for (String recipient : recipients) {
-                if (!recipient.equals(this.inbox.getUserMail())) {
+                if (!recipient.equals(this.inbox.getUserMail()) && !recipient.equals(currentMail.getFrom())){
                     recipientListBuilder.append(recipient).append(", ");
                 }
             }
@@ -338,24 +341,24 @@ public class ViewInboxController{
             String recipientList = recipientListBuilder.toString();
             toTextField.setText(recipientList);
             toTextField.setEditable(false);
-            subjectTextField.setText("Re: " + currentMail.getSubject());
+            subjectTextField.setText("Re-all: " + currentMail.getSubject());
             subjectTextField.setEditable(false);
+            bodyTextArea.setText(currentMail.getBody()+"\n\n\n ");
         }
-        bodyTextArea.setText(currentMail.getBody()+"\n\n\n ");
-
     }
 
     public void handlerForward(ActionEvent actionEvent) {
-        this.setSTATE_FUNC("forward");
-        clearAndEnable();
-        composePanel.setVisible(true);
         Inbox.Mail currentMail = listViewMails.getSelectionModel().getSelectedItem();
-        if (currentMail != null) {
-            bodyTextArea.setText("From: " + currentMail.getFrom() + "\n\n\n" + currentMail.getBody());
+        if (currentMail != null) { //if mail is selected
+            this.setSTATE_FUNC("forward");
+            clearAndEnable(); //func to clear textboxes
+            composePanel.setVisible(true);
+
+            bodyTextArea.setText("Written by: " + currentMail.getFrom() + "\n" + "Content: " + currentMail.getBody());
             subjectTextField.setText("Fw: " + currentMail.getSubject());
             subjectTextField.setEditable(false);
             bodyTextArea.setEditable(false);
-            toTextField.clear();
+            toTextField.clear(); //choose to whom you want to forward the mail
         }
     }
 

@@ -19,7 +19,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button mnemonicParsing="false" onAction="#handlerOpenInbox" style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 16px; fx-padding: 10px 20px; -fx-border-radius: 5px;" text="Open Inbox" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+            <Button mnemonicParsing="false" onAction="#handlerOpenInbox" style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-size: 16px; fx-padding: 10px 20px; -fx-border-radius: 5px;" text="Log in" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
               <Label fx:id="labelError" alignment="CENTER_RIGHT" contentDisplay="RIGHT" text="aaaaa" textAlignment="CENTER" textFill="RED" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER">
                <font>
                   <Font size="18.0" />

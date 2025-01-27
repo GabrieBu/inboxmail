@@ -4,6 +4,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -12,13 +14,13 @@ public class Inbox {
     private final StringProperty userMail = new SimpleStringProperty();
     private final ObservableList<Mail> inbox;
 
-    public ObservableList<Mail> getMails() {
-        return inbox;
-    }
-
     public Inbox() {
         this.inbox = FXCollections.observableArrayList();
         idLastMail =  Long.MIN_VALUE;
+    }
+
+    public ObservableList<Mail> getMails() {
+        return inbox;
     }
 
     public long getIdLastMail() {
@@ -29,13 +31,13 @@ public class Inbox {
         this.idLastMail = idLastMail;
     }
 
+    /* Property */
     public StringProperty userMailProperty() {return userMail;}
 
     public String getUserMail() {return userMail.get();}
 
-
     public void setUserMail(String userMail) {this.userMail.set(userMail);}
-
+    /* ** */
 
     public static class Mail{
         private long id;
@@ -66,6 +68,10 @@ public class Inbox {
             return id;
         }
 
+        public void setId(long id){
+            this.id = id;
+        }
+
         public String getFrom() {
             return from;
         }
@@ -87,8 +93,13 @@ public class Inbox {
         }
 
         public String getDateFormatted() {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            return date_time.format(formatter);
+            DateTimeFormatter fullFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+            if (date_time.toLocalDate().equals(LocalDate.now())) {
+                DateTimeFormatter timeOnlyFormatter = DateTimeFormatter.ofPattern("HH:mm");
+                return date_time.format(timeOnlyFormatter);
+            } else {
+                return date_time.format(fullFormatter);
+            }
         }
-    } //TO CHECK WHETHER PUBLIC IS CORRECT
+    }
 }

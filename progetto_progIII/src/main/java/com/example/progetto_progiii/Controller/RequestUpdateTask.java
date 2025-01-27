@@ -8,6 +8,7 @@ import com.google.gson.JsonParser;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -17,44 +18,42 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
 
-public class ServerCheckerCallable implements Runnable {
-    private volatile boolean running = true;
-    private final int port = 8189;
+public class RequestUpdateTask implements Runnable {
     private final BooleanProperty connectionState = new SimpleBooleanProperty();
-    private TextField textField;
-    private Circle statusCirlce;
+    private final TextField textField;
     private final Inbox inbox;
+    private final Label labelShowError;
 
-    public ServerCheckerCallable(TextField textFieldProva, Circle statusCircle, Inbox inbox) {
+    public RequestUpdateTask(TextField textFieldProva, Circle statusCircle, Label labelShowError, Inbox inbox) {
         textField = textFieldProva;
-        this.statusCirlce = statusCircle;
         this.inbox = inbox;
+        this.labelShowError = labelShowError;
 
         connectionState.addListener((observable, oldValue, newValue) -> {
-            statusCircle.setFill(newValue ? Color.GREEN : Color.RED);
+            statusCircle.setFill(newValue ? Color.GREEN : Color.RED); //listen for changes, if newValue is true then fill with green else red
         });
         // initial fill color
         statusCircle.setFill(Color.RED);
     }
 
     public void run() {
-        while (running) {
-            try (Socket socket = new Socket("localhost", port);
-                 OutputStream outputStream = socket.getOutputStream();
+        while (true) {
+            try (Socket socket = new Socket("localhost", 8189);
                  ServerSocket clientSock = new ServerSocket(socket.getLocalPort())) {
-
+                OutputStream outputStream = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(outputStream, true);
+
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "request");
                 jsonObject.addProperty("user", this.inbox.getUserMail());
                 jsonObject.addProperty("port", clientSock.getLocalPort());
                 jsonObject.addProperty("last_id_received", this.inbox.getIdLastMail());
-
                 writer.println(jsonObject);
-                try (Socket sockIn = clientSock.accept()){
+
+                try (Socket sockIn = clientSock.accept()){ //wait for inbox changes
                     BufferedReader reader = new BufferedReader(new InputStreamReader(sockIn.getInputStream()));
                     String response = reader.readLine();
-                    if (response != null) {
+                    if (response != null) { //if servers send something
                         updateServerConnection(true);
                         JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
                         handleServerResponse(jsonResponse);
@@ -64,33 +63,31 @@ public class ServerCheckerCallable implements Runnable {
                     }
                 }
                 catch(IOException f){
-                    System.out.println("f" + f);
+                    labelShowError.setText("Can't accept connection from server, try to restart application!");
+                    updateServerConnection(false); //server is down
                 }
             } catch (Exception e) {
-                System.out.println(e);
-                updateServerConnection(false);
+                updateServerConnection(false); //server is down
             }
-            //forse si può fare unico switch
+
             try {
-                Thread.sleep(10000); //ogni 20 sec
+                Thread.sleep(5000); //ogni 5 sec
             } catch (InterruptedException e) {
+                labelShowError.setText("Can't update mails from server. Try to restart application!");
                 Thread.currentThread().interrupt();
-                System.out.println("Thread interrotto: " + e.getMessage());
-                // chiusura client pefforza
-                break;
             }
         }
     }
 
     private void handleServerResponse(JsonObject jsonResponse) {
         JsonArray jsonArray = jsonResponse.get("inbox").getAsJsonArray();
-        if(!jsonArray.isEmpty()) {
+        if(!jsonArray.isEmpty()) { //not necessary to modify last_id_received (it will be always minimum if there aren't any mails)
             long new_max = Long.MIN_VALUE;
-            for (JsonElement jsonElement : jsonArray) {
-                JsonObject jsonObject = jsonElement.getAsJsonObject();
-                processIncomingMessage(jsonObject);
-                if(jsonObject.get("id").getAsLong() > new_max)
-                    new_max = jsonObject.get("id").getAsLong();
+            for (JsonElement jsonMail : jsonArray) {
+                JsonObject jsonObjectMail = jsonMail.getAsJsonObject(); //get mails
+                processIncomingMessage(jsonObjectMail);
+                if(jsonObjectMail.get("id").getAsLong() > new_max)
+                    new_max = jsonObjectMail.get("id").getAsLong();
             }
             this.inbox.setIdLastMail(new_max);
         }
@@ -100,7 +97,7 @@ public class ServerCheckerCallable implements Runnable {
         Platform.runLater(() -> {
             Inbox.Mail newMail = parseMessageToMail(jsonMessage);
             if (newMail != null) {
-                inbox.getMails().add(0, newMail);
+                this.inbox.getMails().add(0, newMail);
             }
         });
     }
@@ -114,7 +111,6 @@ public class ServerCheckerCallable implements Runnable {
                 arrayTo[i] = jsonArray.get(i).getAsString();
             }
             LocalDateTime date = LocalDateTime.parse(mail.get("date").getAsString());
-
             return new Inbox.Mail(
                     mail.get("id").getAsLong(),
                     mail.get("from").getAsString(),
@@ -124,14 +120,14 @@ public class ServerCheckerCallable implements Runnable {
                     date
             );
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Mail not valid");
             return null;
         }
     }
 
     private void updateServerConnection (Boolean connection){
-        if (connection != connectionState.get()) {
-            connectionState.set(connection);
+        if (connection != connectionState.get()) { //if connection changes
+            connectionState.set(connection); //update property
             textField.setEditable(true);
             textField.setText(connectionState.get() ? "Online" : "Offline");
             textField.setEditable(false);

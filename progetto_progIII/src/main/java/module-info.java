@@ -9,5 +9,6 @@ module com.example.progetto_progiii {
     opens com.example.progetto_progiii to javafx.fxml;
     exports com.example.progetto_progiii;
     exports com.example.progetto_progiii.Controller;
+    exports com.example.progetto_progiii.Model;
     opens com.example.progetto_progiii.Controller to javafx.fxml;
 }

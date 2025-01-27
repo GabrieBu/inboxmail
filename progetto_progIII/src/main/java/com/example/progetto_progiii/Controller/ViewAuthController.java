@@ -42,8 +42,8 @@ public class ViewAuthController{
         this.stage = stage;
         this.sceneInbox = sceneInbox;
         this.viewInboxController = viewInboxController;
-        labelError.setVisible(false);
-        System.out.println("Model Inbox has been initialized [ViewAuthController]");
+        labelError.setVisible(false); //to be sure
+        System.out.println("Inbox has been initialized [ViewAuthController]");
     }
 
     private boolean validate(String email){
@@ -53,48 +53,48 @@ public class ViewAuthController{
 
     private String pack(String typedMail, int port){
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "authentication");
+        jsonObject.addProperty("type", "authentication"); //dispatcher will dispatch request to the correct task
         jsonObject.addProperty("typed_mail_user", typedMail);
-        jsonObject.addProperty("port", port);
+        jsonObject.addProperty("port", port); //port on which the client will wait (auth true or false)
         return jsonObject.toString();
     }
 
     public void handlerOpenInbox(ActionEvent actionEvent) {
-        String typedMail = textboxEmail.getText();
+        String typedMail = textboxEmail.getText(); //email address typed by user
         if (validate(typedMail)) {
             inbox.setUserMail(typedMail);
-            try ( ServerSocket serverSocket = new ServerSocket(0);) {
+            try ( ServerSocket serverSocket = new ServerSocket(0);
+                  Socket socket = new Socket("localhost", 8189);) {
                 int portClient = serverSocket.getLocalPort();
-                Socket socket = new Socket("localhost", 8189);
 
-                // Authentication request
+                // authentication request
                 OutputStream outputStream = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(outputStream, true); // true for auto-flushing
                 writer.println(pack(typedMail, portClient));
                 socket.close();
-                Socket incomingAuth = serverSocket.accept();
+                Socket incomingAuth = serverSocket.accept(); //wait for the feedback
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(incomingAuth.getInputStream()));
                 String responseLine = reader.readLine();
                 incomingAuth.close();
 
-                if (responseLine == null) {
+                if (responseLine == null) { //if server doesn't send anything
                     labelError.setVisible(true);
                     labelError.setText("Server is not responding. Please try again later.");
                     return;
                 }
 
                 JsonObject response = JsonParser.parseString(responseLine).getAsJsonObject();
-                if (response.get("authenticated").getAsBoolean()) {
+                if (response.get("authenticated").getAsBoolean()) { //true or false
                     viewInboxController.initModel(inbox);
                     stage.setScene(sceneInbox);
                     stage.setMinHeight(730);
                     stage.setMinWidth(950);
                     stage.setTitle("Inbox - " + typedMail);
-                    stage.setOnCloseRequest(event -> viewInboxController.shutdown(event));
+                    stage.setOnCloseRequest(event -> viewInboxController.shutdown(event)); //handler shutdown
                 } else {
                     labelError.setVisible(true);
-                    labelError.setText("Email address not authenticated. Retry.");
+                    labelError.setText("Email address not authenticated in the system. Retry.");
                 }
             } catch (IOException e) {
                 labelError.setVisible(true);

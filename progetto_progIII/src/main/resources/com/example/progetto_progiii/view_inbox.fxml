@@ -35,9 +35,17 @@
                   <Insets left="5.0" top="3.0" />
                </HBox.margin>
                         </TextField>
+            <Label fx:id="labelShowError" prefHeight="27.0" textFill="RED">
+               <HBox.margin>
+                  <Insets left="10.0" top="3.0" />
+               </HBox.margin>
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Label>
          </children>
       </HBox>
-        <SplitPane dividerPositions="0.5" style="-fx-background-color: white; -fx-border-color: gray;" VBox.vgrow="ALWAYS">
+        <SplitPane dividerPositions="0.26914660831509846" style="-fx-background-color: white; -fx-border-color: gray;" VBox.vgrow="ALWAYS">
             <items>
                 <ListView id="listViewInbox" fx:id="listViewMails" editable="true" prefWidth="258.0">
                     <cursor>
